@@ -1,0 +1,2379 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Eskimó Control Center — Joinville I</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Sora:wght@400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* ─── TOKENS ─────────────────────────────────── */
+:root {
+  --red:     #C8372D;
+  --red-lt:  #FEF2F1;
+  --red-md:  #F5C4BF;
+  --green:   #1A7F5A;
+  --green-lt:#EBF7F2;
+  --green-md:#9FDBCA;
+  --amber:   #A16207;
+  --amber-lt:#FEFCE8;
+  --amber-md:#FDE68A;
+  --blue:    #1D4ED8;
+  --blue-lt: #EFF6FF;
+  --blue-md: #BFDBFE;
+  --purple:  #5B21B6;
+  --purple-lt:#F5F3FF;
+
+  --ink:     #0D1117;
+  --ink2:    #161B22;
+  --ink3:    #21262D;
+  --muted:   #6E7681;
+  --subtle:  #8B949E;
+  --border:  #D0D7DE;
+  --border-lt:#E8ECF0;
+  --bg:      #F6F8FA;
+  --surface: #FFFFFF;
+
+  --r:  8px;
+  --r2: 12px;
+  --r3: 16px;
+  --sh: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.05);
+  --sh2:0 4px 16px rgba(0,0,0,.08);
+}
+
+/* ─── RESET ──────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--ink); font-size: 13px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+button { font-family: inherit; }
+input, select { font-family: inherit; }
+
+/* ─── LAYOUT ─────────────────────────────────── */
+.app { display: flex; min-height: 100vh; }
+
+/* ─── SIDEBAR ────────────────────────────────── */
+.sidebar {
+  width: 216px;
+  flex-shrink: 0;
+  background: var(--ink);
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  border-right: 1px solid var(--ink2);
+  z-index: 50;
+}
+
+.sb-brand {
+  padding: 18px 16px 14px;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sb-brand-icon {
+  width: 32px; height: 32px;
+  background: var(--red);
+  border-radius: 7px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.sb-brand-text { min-width: 0; }
+.sb-brand-name { font-family: 'Sora', sans-serif; font-size: 13px; font-weight: 700; color: #fff; line-height: 1.2; }
+.sb-brand-sub  { font-size: 10px; color: rgba(255,255,255,.35); margin-top: 1px; }
+
+.sb-section {
+  padding: 14px 14px 4px;
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: rgba(255,255,255,.2);
+}
+
+.sb-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 12px;
+  margin: 1px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  color: rgba(255,255,255,.5);
+  font-size: 13px;
+  font-weight: 500;
+  text-align: left;
+  width: calc(100% - 16px);
+  transition: background .12s, color .12s;
+  font-family: 'Inter', sans-serif;
+}
+
+.sb-item:hover { background: rgba(255,255,255,.06); color: rgba(255,255,255,.85); }
+
+.sb-item.active {
+  background: rgba(200,55,45,.18);
+  color: #F87171;
+  font-weight: 600;
+}
+
+.sb-item .sb-icon {
+  font-size: 14px;
+  width: 20px;
+  text-align: center;
+  flex-shrink: 0;
+  opacity: .85;
+}
+
+.sb-item .sb-label { flex: 1; min-width: 0; }
+
+.sb-item .sb-badge {
+  font-size: 10px;
+  font-weight: 700;
+  background: var(--red);
+  color: #fff;
+  padding: 1px 6px;
+  border-radius: 10px;
+  min-width: 18px;
+  text-align: center;
+}
+
+.sb-divider { height: 1px; background: rgba(255,255,255,.06); margin: 6px 16px; }
+
+/* ─── MAIN ───────────────────────────────────── */
+.main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+
+/* ─── TOPBAR ─────────────────────────────────── */
+.topbar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border-lt);
+  height: 54px;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: sticky;
+  top: 0;
+  z-index: 40;
+}
+
+.topbar-page {
+  font-family: 'Sora', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.topbar-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+
+.topbar-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  border: none;
+  font-family: 'Inter', sans-serif;
+}
+
+.topbar-badge.date {
+  background: var(--bg);
+  color: var(--muted);
+  border: 1px solid var(--border);
+  font-family: 'JetBrains Mono', monospace;
+  cursor: default;
+}
+
+.topbar-badge.audit {
+  background: var(--green-lt);
+  color: var(--green);
+  border: 1px solid var(--green-md);
+}
+
+.topbar-badge.alert {
+  background: var(--red-lt);
+  color: var(--red);
+  border: 1px solid var(--red-md);
+  animation: pulse 2.5s ease-in-out infinite;
+}
+
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.65} }
+
+/* ─── CONTENT ────────────────────────────────── */
+.content { padding: 24px; flex: 1; overflow-y: auto; }
+.module  { display: none; }
+.module.active { display: block; }
+
+/* ─── TYPOGRAPHY ─────────────────────────────── */
+.page-title {
+  font-family: 'Sora', sans-serif;
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--ink);
+  letter-spacing: -.4px;
+  margin-bottom: 4px;
+}
+
+.page-sub {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 22px;
+}
+
+.section-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .6px;
+  color: var(--muted);
+  margin-bottom: 10px;
+  margin-top: 22px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.section-label:first-child { margin-top: 0; }
+
+/* ─── CARDS ──────────────────────────────────── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r2);
+  box-shadow: var(--sh);
+  padding: 18px 20px;
+}
+
+.card-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+/* ─── KPI STRIP ──────────────────────────────── */
+.kpi-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 12px; margin-bottom: 20px; }
+
+.kpi {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r2);
+  padding: 16px 18px;
+  box-shadow: var(--sh);
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  transition: box-shadow .15s;
+}
+
+.kpi:hover { box-shadow: var(--sh2); }
+
+.kpi-eyebrow {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .6px;
+  color: var(--muted);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.kpi-val {
+  font-family: 'Sora', sans-serif;
+  font-size: 26px;
+  font-weight: 800;
+  line-height: 1;
+  margin-bottom: 4px;
+  letter-spacing: -.5px;
+}
+
+.kpi-sub { font-size: 11px; color: var(--muted); }
+
+.kpi.red   { border-top: 3px solid var(--red);    } .kpi.red   .kpi-val { color: var(--red); }
+.kpi.green { border-top: 3px solid var(--green);  } .kpi.green .kpi-val { color: var(--green); }
+.kpi.amber { border-top: 3px solid var(--amber);  } .kpi.amber .kpi-val { color: var(--amber); }
+.kpi.blue  { border-top: 3px solid var(--blue);   } .kpi.blue  .kpi-val { color: var(--blue); }
+.kpi.purple{ border-top: 3px solid var(--purple); } .kpi.purple .kpi-val{ color: var(--purple); }
+
+/* ─── HERO ───────────────────────────────────── */
+.dash-hero {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.hero-dark {
+  background: var(--ink);
+  border-radius: var(--r3);
+  padding: 24px;
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+  min-height: 210px;
+}
+
+.hero-dark::before {
+  content: '';
+  position: absolute;
+  top: -40px; right: -40px;
+  width: 160px; height: 160px;
+  background: radial-gradient(circle, rgba(200,55,45,.3) 0%, transparent 70%);
+  border-radius: 50%;
+}
+
+.hero-eyebrow { font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: rgba(255,255,255,.4); margin-bottom: 6px; }
+.hero-val { font-family: 'Sora', sans-serif; font-size: 40px; font-weight: 800; line-height: 1; letter-spacing: -1px; margin-bottom: 3px; }
+.hero-sub { font-size: 11px; color: rgba(255,255,255,.4); margin-bottom: 20px; }
+
+.hero-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.hs { background: rgba(255,255,255,.06); border-radius: 8px; padding: 10px 12px; }
+.hs-val { font-family: 'Sora', sans-serif; font-size: 19px; font-weight: 800; }
+.hs-lbl { font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: .6px; color: rgba(255,255,255,.35); margin-top: 2px; }
+.hs.green .hs-val  { color: #4ADE80; }
+.hs.red .hs-val    { color: #F87171; }
+.hs.amber .hs-val  { color: #FCD34D; }
+.hs.sky .hs-val    { color: #7DD3FC; }
+
+.hero-meter {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r3);
+  padding: 22px 24px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  box-shadow: var(--sh);
+}
+
+.meter-legend { flex: 1; }
+.meter-title  { font-family: 'Sora', sans-serif; font-size: 16px; font-weight: 700; margin-bottom: 3px; }
+.meter-sub    { font-size: 11px; color: var(--muted); margin-bottom: 14px; }
+.leg-row      { display: flex; align-items: center; gap: 7px; margin-bottom: 6px; font-size: 12px; }
+.leg-dot      { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.leg-val      { margin-left: auto; font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; }
+.leg-divider  { height: 1px; background: var(--border-lt); margin: 8px 0; }
+
+/* ─── TIMELINE ───────────────────────────────── */
+.timeline-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r2);
+  padding: 18px 20px;
+  box-shadow: var(--sh);
+  margin-bottom: 20px;
+}
+
+.ruler { display: flex; height: 6px; border-radius: 3px; overflow: hidden; margin-bottom: 6px; }
+.ruler-lbl { display: flex; font-size: 10px; font-weight: 600; color: var(--muted); margin-bottom: 14px; }
+.ruler-lbl span { flex: 1; }
+
+.so-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border-lt);
+  background: var(--bg);
+  margin-bottom: 6px;
+  transition: background .1s;
+}
+.so-row:hover { background: #EFF1F3; }
+.so-row.urg { background: var(--red-lt); border-color: var(--red-md); }
+.so-row.warn2 { background: #FFFBEB; border-color: var(--amber-md); }
+.so-row.ok2  { background: var(--green-lt); border-color: var(--green-md); }
+
+.so-name  { flex: 1; font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.so-bar-bg { width: 120px; height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; flex-shrink: 0; }
+.so-bar-fill { height: 100%; border-radius: 3px; }
+.so-days  { font-family: 'Sora', sans-serif; font-size: 14px; font-weight: 800; min-width: 44px; text-align: right; }
+.so-daily { font-size: 10px; color: var(--muted); min-width: 64px; text-align: right; font-family: 'JetBrains Mono', monospace; }
+.so-badge { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 4px; white-space: nowrap; }
+.b-urg   { background: var(--red); color: #fff; }
+.b-warn  { background: var(--amber); color: #fff; }
+.b-ok    { background: var(--green); color: #fff; }
+.b-safe  { background: #6B7280; color: #fff; }
+.so-pedir { font-size: 10px; font-weight: 700; color: var(--green); min-width: 72px; text-align: right; }
+
+/* ─── ORDER CARDS ────────────────────────────── */
+.order-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px; }
+
+.order-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  border-radius: 6px;
+  background: var(--bg);
+  font-size: 12px;
+  margin-bottom: 5px;
+}
+
+.order-row.urg { background: var(--red-lt); }
+.order-name { flex: 1; font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.order-qty  { font-family: 'Sora', sans-serif; font-size: 17px; font-weight: 800; min-width: 44px; text-align: right; }
+.order-unit { font-size: 10px; color: var(--muted); }
+
+/* ─── SELLERS ────────────────────────────────── */
+.seller-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+
+.seller-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 11px;
+  border-radius: 7px;
+  background: var(--bg);
+  border: 1px solid transparent;
+  transition: border-color .12s;
+}
+
+.seller-row:hover { border-color: var(--border); }
+
+.s-rank { font-family: 'Sora', sans-serif; font-size: 16px; font-weight: 800; color: var(--red); min-width: 22px; }
+.s-body { flex: 1; min-width: 0; }
+.s-name { font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.s-meta { font-size: 10px; color: var(--muted); margin-top: 1px; }
+.s-bar  { min-width: 80px; }
+.s-val  { font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600; text-align: right; margin-bottom: 3px; }
+.s-bar-bg { height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+.s-bar-fill { height: 100%; border-radius: 2px; }
+
+/* ─── ANALYTICS CHARTS ───────────────────────── */
+.chart-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px; }
+.chart-3col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 20px; }
+
+.bar-h-row { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; }
+.bar-h-label { font-size: 11px; font-weight: 500; width: 160px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-shrink: 0; }
+.bar-h-track { flex: 1; height: 20px; background: var(--bg); border-radius: 4px; overflow: hidden; position: relative; }
+.bar-h-fill  { height: 100%; border-radius: 4px; display: flex; align-items: center; padding-left: 7px; }
+.bar-h-fill-label { font-size: 10px; font-weight: 700; color: #fff; white-space: nowrap; }
+.bar-h-val   { font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600; min-width: 48px; text-align: right; color: var(--muted); }
+
+/* Donut chart via SVG */
+.donut-wrap { display: flex; align-items: center; gap: 16px; }
+.donut-legend { flex: 1; }
+.donut-leg-row { display: flex; align-items: center; gap: 6px; margin-bottom: 7px; font-size: 12px; }
+.donut-leg-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+.donut-leg-val { margin-left: auto; font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600; }
+
+/* Sparkline area chart */
+.spark-wrap { position: relative; }
+.spark-label { font-size: 10px; color: var(--muted); margin-bottom: 4px; display: flex; justify-content: space-between; }
+
+/* Stock vs Sales bars */
+.svs-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.svs-label { font-size: 11px; font-weight: 500; width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-shrink: 0; }
+.svs-bars { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.svs-bar { height: 8px; border-radius: 2px; }
+.svs-val  { font-size: 10px; color: var(--muted); min-width: 36px; text-align: right; font-family: 'JetBrains Mono', monospace; }
+
+/* ─── TABLE ──────────────────────────────────── */
+.table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r2); box-shadow: var(--sh); overflow: hidden; }
+.table-head-row { padding: 10px 16px; background: var(--bg); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+.table-head-title { font-size: 13px; font-weight: 700; }
+.search-input { border: 1px solid var(--border); border-radius: 6px; padding: 5px 11px; font-size: 12px; outline: none; background: var(--surface); width: 200px; transition: border-color .15s; }
+.search-input:focus { border-color: var(--blue); }
+table { width: 100%; border-collapse: collapse; }
+th { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; padding: 9px 14px; background: var(--bg); border-bottom: 1px solid var(--border); text-align: left; white-space: nowrap; }
+td { padding: 9px 14px; border-bottom: 1px solid var(--border-lt); font-size: 12px; vertical-align: middle; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--bg); }
+.mono { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; }
+.cod-pill { font-family: 'JetBrains Mono', monospace; font-size: 10px; background: var(--purple-lt); color: var(--purple); padding: 2px 6px; border-radius: 4px; }
+.tag { font-size: 10px; font-weight: 600; background: var(--bg); color: var(--muted); padding: 2px 6px; border-radius: 4px; border: 1px solid var(--border); }
+
+/* ─── STATUS PILLS ───────────────────────────── */
+.pill { display: inline-flex; align-items: center; font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 4px; gap: 3px; white-space: nowrap; }
+.pill.red    { background: var(--red-lt);    color: var(--red);    border: 1px solid var(--red-md);    }
+.pill.green  { background: var(--green-lt);  color: var(--green);  border: 1px solid var(--green-md);  }
+.pill.amber  { background: var(--amber-lt);  color: var(--amber);  border: 1px solid var(--amber-md);  }
+.pill.blue   { background: var(--blue-lt);   color: var(--blue);   border: 1px solid var(--blue-md);   }
+.pill.purple { background: var(--purple-lt); color: var(--purple); border: 1px solid #C4B5FD; }
+.pill.gray   { background: var(--bg);        color: var(--muted);  border: 1px solid var(--border);    }
+
+/* ─── CHIPS / FILTERS ────────────────────────── */
+.chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; align-items: center; }
+.chip { padding: 5px 11px; border-radius: 5px; font-size: 11px; font-weight: 600; cursor: pointer; border: 1px solid var(--border); background: var(--surface); color: var(--muted); transition: all .12s; }
+.chip:hover { border-color: var(--ink); color: var(--ink); }
+.chip.on { background: var(--ink); color: #fff; border-color: var(--ink); }
+
+/* ─── ALERTS ─────────────────────────────────── */
+.alert-kpi-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 18px; }
+.a-kpi { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r2); padding: 14px 16px; box-shadow: var(--sh); }
+.a-kpi-val { font-family: 'Sora', sans-serif; font-size: 26px; font-weight: 800; }
+.a-kpi-lbl { font-size: 10px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .4px; margin-top: 3px; }
+.alert-list { display: flex; flex-direction: column; gap: 8px; }
+.al-item { display: flex; gap: 12px; padding: 12px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); box-shadow: var(--sh); border-left: 3px solid transparent; }
+.al-item.crit { border-left-color: var(--red);   background: var(--red-lt);   }
+.al-item.warn { border-left-color: var(--amber); background: var(--amber-lt); }
+.al-item.info { border-left-color: var(--blue);  background: var(--blue-lt);  }
+.al-emoji { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+.al-title { font-size: 12px; font-weight: 700; margin-bottom: 2px; }
+.al-body  { font-size: 11px; color: var(--muted); line-height: 1.5; }
+
+/* ─── COMMISSION ─────────────────────────────── */
+.comm-hero { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 20px; }
+.comm-card { border-radius: var(--r2); padding: 18px 20px; border: 1px solid var(--border); }
+.comm-val  { font-family: 'Sora', sans-serif; font-size: 30px; font-weight: 800; line-height: 1; margin-bottom: 3px; }
+.comm-lbl  { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; }
+.comm-sub  { font-size: 11px; margin-top: 5px; opacity: .6; }
+.scenario-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+.sc-card { border-radius: var(--r2); padding: 16px 18px; border: 2px solid var(--border); cursor: pointer; transition: border-color .15s, box-shadow .15s; background: var(--surface); }
+.sc-card:hover { box-shadow: var(--sh2); }
+.sc-card.on { border-color: var(--red); }
+.sc-icon  { font-size: 24px; margin-bottom: 8px; }
+.sc-title { font-size: 13px; font-weight: 700; margin-bottom: 2px; }
+.sc-rate  { font-size: 11px; color: var(--muted); }
+.sc-val   { font-family: 'Sora', sans-serif; font-size: 26px; font-weight: 800; margin-top: 10px; }
+
+/* ─── REPOSIÇÃO ──────────────────────────────── */
+.rep-head { display: grid; grid-template-columns: 1fr 80px 100px 1fr 110px 140px; gap: 10px; padding: 8px 16px; background: var(--bg); border-radius: var(--r); font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }
+.rep-row  { display: grid; grid-template-columns: 1fr 80px 100px 1fr 110px 140px; gap: 10px; padding: 11px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); box-shadow: var(--sh); align-items: center; margin-bottom: 6px; }
+.rep-row.urg { background: var(--red-lt); border-color: var(--red-md); }
+
+/* ─── PROMOÇÕES ──────────────────────────────── */
+.promo-form-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1.1fr auto; gap: 10px; align-items: end; margin-bottom: 14px; }
+.form-field label { display: block; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); margin-bottom: 5px; }
+.form-field input, .form-field select {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 7px 11px;
+  font-size: 12px;
+  font-family: inherit;
+  outline: none;
+  background: var(--surface);
+  transition: border-color .15s;
+}
+.form-field input:focus, .form-field select:focus { border-color: var(--blue); }
+.btn-primary { background: var(--ink); color: #fff; border: none; border-radius: 6px; padding: 8px 18px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit; height: 34px; transition: background .15s; white-space: nowrap; }
+.btn-primary:hover { background: var(--ink2); }
+.btn-secondary { background: var(--surface); color: var(--ink); border: 1px solid var(--border); border-radius: 6px; padding: 6px 12px; font-size: 11px; font-weight: 600; cursor: pointer; font-family: inherit; transition: background .15s; }
+.btn-secondary:hover { background: var(--bg); }
+.btn-danger { background: none; border: 1px solid var(--border); border-radius: 4px; padding: 3px 8px; font-size: 10px; cursor: pointer; color: var(--muted); font-family: inherit; }
+
+/* ─── UPLOAD / DAILY ─────────────────────────── */
+.upload-zone { border: 2px dashed var(--border); border-radius: var(--r2); padding: 40px; text-align: center; background: var(--surface); cursor: pointer; transition: border-color .15s, background .15s; margin-bottom: 18px; }
+.upload-zone:hover, .upload-zone.drag { border-color: var(--red); background: var(--red-lt); }
+.upload-icon  { font-size: 36px; margin-bottom: 10px; }
+.upload-title { font-family: 'Sora', sans-serif; font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+.upload-sub   { font-size: 12px; color: var(--muted); }
+.upload-input { display: none; }
+.daily-accum-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 14px; }
+.daily-accum-cell { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 12px 14px; text-align: center; }
+.dac-val { font-family: 'Sora', sans-serif; font-size: 20px; font-weight: 800; }
+.dac-lbl { font-size: 10px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .4px; margin-top: 3px; }
+
+/* ─── WEATHER ────────────────────────────────── */
+.weather-strip { display: grid; grid-template-columns: repeat(5,1fr); border: 1px solid var(--border); border-radius: var(--r2); overflow: hidden; background: var(--surface); box-shadow: var(--sh); margin-bottom: 20px; }
+.wx-day { padding: 12px 10px; text-align: center; border-right: 1px solid var(--border-lt); }
+.wx-day:last-child { border-right: none; }
+.wx-dow  { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; color: var(--muted); margin-bottom: 6px; }
+.wx-icon { font-size: 24px; margin-bottom: 6px; }
+.wx-temp { font-family: 'Sora', sans-serif; font-size: 16px; font-weight: 700; }
+.wx-rain { font-size: 10px; color: var(--muted); margin: 2px 0 6px; }
+.wx-impact { font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; display: inline-block; }
+
+/* ─── FREEZER ────────────────────────────────── */
+.fz-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 18px; }
+.fz-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r2); padding: 16px 18px; box-shadow: var(--sh); }
+.fz-header { font-size: 12px; font-weight: 700; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+.fz-item { display: flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 5px; background: var(--bg); margin-bottom: 4px; font-size: 11px; font-weight: 500; }
+.fz-item .fn { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fz-item .fq { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--muted); flex-shrink: 0; }
+
+/* ─── ENGRADADOS ─────────────────────────────── */
+.eng-kpi-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 18px; }
+
+/* ─── SCROLLBAR ──────────────────────────────── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+/* ─── RESPONSIVE ─────────────────────────────── */
+@media (max-width: 1024px) {
+  .kpi-grid { grid-template-columns: repeat(3,1fr); }
+  .dash-hero { grid-template-columns: 1fr; }
+  .chart-2col, .order-grid { grid-template-columns: 1fr; }
+  .comm-hero { grid-template-columns: repeat(2,1fr); }
+}
+@media (max-width: 768px) {
+  .sidebar { display: none; }
+  .kpi-grid { grid-template-columns: repeat(2,1fr); }
+  .seller-grid { grid-template-columns: 1fr; }
+  .fz-grid { grid-template-columns: 1fr; }
+  .scenario-grid { grid-template-columns: 1fr; }
+  .rep-row { grid-template-columns: 1fr 70px 80px; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- ═══ SIDEBAR ═══ -->
+<aside class="sidebar">
+  <div class="sb-brand">
+    <div class="sb-brand-icon">🍦</div>
+    <div class="sb-brand-text">
+      <div class="sb-brand-name">Eskimó Control</div>
+      <div class="sb-brand-sub">Joinville I — SC</div>
+    </div>
+  </div>
+
+  <div class="sb-section">Visão Geral</div>
+  <button class="sb-item active" onclick="go('dashboard',this)">
+    <span class="sb-icon">📊</span><span class="sb-label">Dashboard</span>
+  </button>
+  <button class="sb-item" onclick="go('comissao',this)">
+    <span class="sb-icon">💰</span><span class="sb-label">Minha Comissão</span>
+  </button>
+  <button class="sb-item" onclick="go('alertas',this)">
+    <span class="sb-icon">🔔</span><span class="sb-label">Alertas</span>
+    <span class="sb-badge" id="badge-alert">8</span>
+  </button>
+
+  <div class="sb-divider"></div>
+  <div class="sb-section">Estoque</div>
+  <button class="sb-item" onclick="go('analytics',this)">
+    <span class="sb-icon">📈</span><span class="sb-label">Análise de Vendas</span>
+  </button>
+  <button class="sb-item" onclick="go('estoque',this)">
+    <span class="sb-icon">📦</span><span class="sb-label">Inventário</span>
+  </button>
+  <button class="sb-item" onclick="go('reposicao',this)">
+    <span class="sb-icon">🔄</span><span class="sb-label">Reposição</span>
+  </button>
+  <button class="sb-item" onclick="go('freezer',this)">
+    <span class="sb-icon">🧊</span><span class="sb-label">Organização Freezer</span>
+  </button>
+
+  <div class="sb-divider"></div>
+  <div class="sb-section">Comercial</div>
+  <button class="sb-item" onclick="go('promocoes',this)">
+    <span class="sb-icon">🏷️</span><span class="sb-label">Promoções Ativas</span>
+  </button>
+  <button class="sb-item" onclick="go('tempo',this)">
+    <span class="sb-icon">🌤️</span><span class="sb-label">Previsão do Tempo</span>
+  </button>
+
+  <div class="sb-divider"></div>
+  <div class="sb-section">Dados</div>
+  <button class="sb-item" onclick="go('upload',this)">
+    <span class="sb-icon">⬆️</span><span class="sb-label">Atualizar Dados</span>
+  </button>
+</aside>
+
+<!-- ═══ MAIN ═══ -->
+<div class="main">
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div style="font-family:'Sora',sans-serif;font-size:13px;font-weight:600;color:var(--muted)">🍦 Eskimó Control Center</div>
+    <div style="color:var(--border);margin:0 4px">·</div>
+    <div class="topbar-page" id="topbar-page">Dashboard</div>
+    <div class="topbar-right">
+      <div class="topbar-badge audit">✅ SC-4 · 18/06/2026</div>
+      <div class="topbar-badge date" id="topbar-date"></div>
+      <button class="topbar-badge alert" onclick="go('alertas',null)">⚠️ Alertas ativos</button>
+    </div>
+  </header>
+
+  <div class="content">
+
+
+<!-- ═══════════ DASHBOARD ═══════════ -->
+<div id="mod-dashboard" class="module active">
+  <div class="page-title">Dashboard</div>
+  <div class="page-sub">Visão executiva · Joinville I · Acumulado Jun 1–18 · 18 dias</div>
+
+  <!-- HERO -->
+  <div class="dash-hero">
+    <div class="hero-dark">
+      <div class="hero-eyebrow">Valor total em estoque · SC-4</div>
+      <div class="hero-val">R$ 417k</div>
+      <div class="hero-sub">Auditado · 18/06/2026 13:41 · Joinville I</div>
+      <div class="hero-stats">
+        <div class="hs green"><div class="hs-val" id="h-pos">—</div><div class="hs-lbl">SKUs positivos</div></div>
+        <div class="hs red"><div class="hs-val" id="h-zero">—</div><div class="hs-lbl">Zerados</div></div>
+        <div class="hs sky"><div class="hs-val">R$39,7k</div><div class="hs-lbl">Acum. Jun 1–18</div></div>
+        <div class="hs amber"><div class="hs-val" id="h-rup">—</div><div class="hs-lbl">Risco ruptura</div></div>
+      </div>
+    </div>
+    <div class="hero-meter">
+      <div style="flex-shrink:0;width:100px;">
+        <svg viewBox="0 0 110 160" width="100" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="cG" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#F5C842"/><stop offset="100%" stop-color="#C8810A"/></linearGradient>
+            <linearGradient id="s1G" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FC9595"/><stop offset="100%" stop-color="#C8372D"/></linearGradient>
+            <linearGradient id="s2G" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#6EE7B7"/><stop offset="100%" stop-color="#1A7F5A"/></linearGradient>
+            <linearGradient id="s3G" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FCD34D"/><stop offset="100%" stop-color="#A16207"/></linearGradient>
+          </defs>
+          <polygon points="55,155 18,95 92,95" fill="url(#cG)"/>
+          <line x1="55" y1="155" x2="30" y2="110" stroke="#92400E" stroke-width="1" opacity=".35"/>
+          <line x1="55" y1="155" x2="46" y2="105" stroke="#92400E" stroke-width="1" opacity=".35"/>
+          <line x1="55" y1="155" x2="65" y2="100" stroke="#92400E" stroke-width="1" opacity=".35"/>
+          <line x1="55" y1="155" x2="78" y2="108" stroke="#92400E" stroke-width="1" opacity=".35"/>
+          <line x1="23" y1="118" x2="87" y2="118" stroke="#92400E" stroke-width="1" opacity=".25"/>
+          <line x1="20" y1="107" x2="90" y2="107" stroke="#92400E" stroke-width="1" opacity=".25"/>
+          <ellipse cx="55" cy="72" rx="42" ry="36" fill="url(#s1G)"/>
+          <ellipse cx="55" cy="63" rx="37" ry="28" fill="#E86060"/>
+          <ellipse cx="44" cy="57" rx="13" ry="9" fill="#F29090" opacity=".5"/>
+          <ellipse cx="37" cy="46" rx="30" ry="26" fill="url(#s2G)"/>
+          <ellipse cx="31" cy="40" rx="18" ry="14" fill="#34D399" opacity=".5"/>
+          <ellipse cx="71" cy="42" rx="26" ry="22" fill="url(#s3G)"/>
+          <ellipse cx="67" cy="36" rx="14" ry="10" fill="#FDE68A" opacity=".5"/>
+          <rect x="51" y="41" width="5" height="2" rx="1" fill="#C8372D" transform="rotate(-30 53 42)"/>
+          <rect x="61" y="56" width="5" height="2" rx="1" fill="#1A7F5A" transform="rotate(15 63 57)"/>
+          <rect x="41" y="61" width="5" height="2" rx="1" fill="#5B21B6" transform="rotate(45 43 62)"/>
+          <rect x="66" y="46" width="4" height="2" rx="1" fill="#1D4ED8" transform="rotate(-20 68 47)"/>
+          <circle cx="70" cy="20" r="7" fill="#991B1B"/>
+          <circle cx="68" cy="18" r="2.5" fill="#C8372D" opacity=".8"/>
+          <path d="M70 15 Q65 8 68 3" stroke="#15803D" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="meter-legend">
+        <div class="meter-title">Saúde do Estoque</div>
+        <div class="meter-sub">Pós-auditoria SC-4 · Jun 2026 · Inverno</div>
+        <div class="leg-row"><div class="leg-dot" style="background:#1A7F5A"></div><span>Com saldo positivo</span><span class="leg-val" style="color:#1A7F5A" id="leg-pos">—</span></div>
+        <div class="leg-row"><div class="leg-dot" style="background:#C8372D"></div><span>Zerados</span><span class="leg-val" style="color:#C8372D" id="leg-zero">—</span></div>
+        <div class="leg-row"><div class="leg-dot" style="background:#A16207"></div><span>Risco ruptura &lt;5d</span><span class="leg-val" style="color:#A16207" id="leg-rup">—</span></div>
+        <div class="leg-divider"></div>
+        <div class="leg-row"><span style="font-size:11px;color:var(--muted)">Fat. acumulado jun.</span><span class="leg-val" style="font-size:13px">R$ 39.711</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- KPIs -->
+  <div class="kpi-grid">
+    <div class="kpi red" onclick="go('comissao',null)">
+      <div class="kpi-eyebrow">💰 Comissão bruta</div>
+      <div class="kpi-val" id="kpi-comm">R$5,7k</div>
+      <div class="kpi-sub">acum. jun · sem promoção</div>
+    </div>
+    <div class="kpi green">
+      <div class="kpi-eyebrow">📦 Valor em estoque</div>
+      <div class="kpi-val">R$417k</div>
+      <div class="kpi-sub">auditado SC-4</div>
+    </div>
+    <div class="kpi amber">
+      <div class="kpi-eyebrow">🧾 Faturado em junho</div>
+      <div class="kpi-val">R$39,7k</div>
+      <div class="kpi-sub">Jun 1–18 · R$2.206/dia</div>
+    </div>
+    <div class="kpi blue" onclick="go('analytics',null)">
+      <div class="kpi-eyebrow">🏆 Top vendedor</div>
+      <div class="kpi-val">777</div>
+      <div class="kpi-sub">Brasileirinho · acum.jun</div>
+    </div>
+    <div class="kpi purple" onclick="go('upload',null)">
+      <div class="kpi-eyebrow">⬆️ Última planilha</div>
+      <div class="kpi-val">SC-4</div>
+      <div class="kpi-sub">clique para atualizar</div>
+    </div>
+  </div>
+
+  <!-- PREVISÃO ESTOQUE -->
+  <div class="section-label">⏱️ Previsão de Término — produtos em risco</div>
+  <div class="timeline-card">
+    <div class="ruler">
+      <div style="flex:1;background:#C8372D"></div>
+      <div style="flex:1;background:#D97706"></div>
+      <div style="flex:2;background:#A16207"></div>
+      <div style="flex:2;background:#1A7F5A"></div>
+      <div style="flex:4;background:#D0D7DE"></div>
+    </div>
+    <div class="ruler-lbl">
+      <span style="color:#C8372D">Zerado</span>
+      <span style="color:#D97706">≤7d</span>
+      <span style="color:#A16207">≤14d</span>
+      <span style="color:#1A7F5A">≤30d</span>
+      <span style="color:#9CA3AF">OK</span>
+    </div>
+    <div id="stockout-rows"></div>
+  </div>
+
+  <!-- PEDIDOS -->
+  <div class="order-grid">
+    <div class="card"><div class="card-title">🛒 Pedido Urgente <span style="font-size:10px;font-weight:500;color:var(--muted)">(cobertura 14 dias)</span></div><div id="urgent-orders"></div></div>
+    <div class="card"><div class="card-title">📋 Reposição Normal <span style="font-size:10px;font-weight:500;color:var(--muted)">(10–20 dias)</span></div><div id="normal-orders"></div></div>
+  </div>
+
+  <!-- TOP SELLERS -->
+  <div class="section-label">🏆 Top Vendas — Acumulado Jun 1–18</div>
+  <div class="card"><div class="seller-grid" id="seller-rows"></div></div>
+</div>
+
+<!-- ═══════════ ANALYTICS ═══════════ -->
+<div id="mod-analytics" class="module">
+  <div class="page-title">Análise de Vendas</div>
+  <div class="page-sub">Vendas vs estoque · Representatividade · Giro · Jun 1–18</div>
+
+  <div class="chart-2col">
+    <!-- TOP 10 VOLUME -->
+    <div class="card">
+      <div class="card-title">📊 Top 10 · Volume de Saídas (un.)</div>
+      <div id="chart-top10-vol"></div>
+    </div>
+    <!-- TOP 10 FATURAMENTO -->
+    <div class="card">
+      <div class="card-title">💰 Top 10 · Faturamento Acumulado (R$)</div>
+      <div id="chart-top10-fat"></div>
+    </div>
+  </div>
+
+  <!-- ESTOQUE vs VENDAS -->
+  <div class="card" style="margin-bottom:14px;">
+    <div class="card-title">📦 Estoque Atual vs Saídas Jun — Top 20 produtos</div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:14px;">Barra azul = estoque atual · Barra coral = saídas acumuladas. Quando saída supera estoque → risco de ruptura.</div>
+    <div id="chart-svs"></div>
+  </div>
+
+  <div class="chart-3col">
+    <!-- REPRESENTATIVIDADE FAT -->
+    <div class="card">
+      <div class="card-title">🥧 Faturamento por Categoria</div>
+      <div id="chart-cat-fat"></div>
+    </div>
+    <!-- GIRO DIÁRIO -->
+    <div class="card">
+      <div class="card-title">⚡ Giro Diário — Top 15 (un/dia)</div>
+      <div id="chart-giro"></div>
+    </div>
+    <!-- COBERTURA DIAS -->
+    <div class="card">
+      <div class="card-title">📅 Cobertura — Dias restantes</div>
+      <div id="chart-cobertura"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ COMISSÃO ═══════════ -->
+<div id="mod-comissao" class="module">
+  <div class="page-title">Minha Comissão</div>
+  <div class="page-sub">Cálculo baseado no acumulado Jun 1–18 + lançamentos diários</div>
+
+  <div class="comm-hero">
+    <div class="comm-card" style="background:var(--ink);color:#fff;box-shadow:var(--sh);">
+      <div class="comm-lbl" style="color:rgba(255,255,255,.4)">Faturamento acumulado</div>
+      <div class="comm-val" style="color:#fff">R$ 39.711</div>
+      <div class="comm-sub" style="color:rgba(255,255,255,.35)">Jun 1–18 · 18 dias · 129 produtos</div>
+    </div>
+    <div class="comm-card" style="background:var(--green-lt);border-color:var(--green-md);">
+      <div class="comm-lbl" style="color:var(--green)">Gelados jun. 1–18</div>
+      <div class="comm-val" style="color:var(--green)">R$ 37.395</div>
+      <div class="comm-sub">picolés, potes, açaí · 18 dias</div>
+    </div>
+    <div class="comm-card" style="background:var(--amber-lt);border-color:var(--amber-md);">
+      <div class="comm-lbl" style="color:var(--amber)">Secos jun. 1–18</div>
+      <div class="comm-val" style="color:var(--amber)">R$ 2.317</div>
+      <div class="comm-sub">coberturas, doces, acess. · 18 dias</div>
+    </div>
+    <div class="comm-card" style="background:var(--blue-lt);border-color:var(--blue-md);">
+      <div class="comm-lbl" style="color:var(--blue)">Comissão bruta projetada</div>
+      <div class="comm-val" style="color:var(--blue)" id="comm-total-display">R$ 5.678</div>
+      <div class="comm-sub" id="comm-scenario-label">Cenário: sem promoção (15%)</div>
+    </div>
+  </div>
+
+  <div class="section-label">Cenário do período</div>
+  <div class="scenario-grid">
+    <div class="sc-card on" id="sc-normal" onclick="selectScenario('normal')">
+      <div class="sc-icon">🍦</div>
+      <div class="sc-title">Sem promoção</div>
+      <div class="sc-rate">Gelados 15% · Secos 3%</div>
+      <div class="sc-val" style="color:var(--green)">R$ 5.678</div>
+      <div style="font-size:10px;color:var(--muted);margin-top:4px">acumulado 18 dias</div>
+    </div>
+    <div class="sc-card" id="sc-promo" onclick="selectScenario('promo')">
+      <div class="sc-icon">🏷️</div>
+      <div class="sc-title">Promoção da fábrica</div>
+      <div class="sc-rate">Gelados 7% · Secos 3%</div>
+      <div class="sc-val" style="color:var(--amber)">R$ 2.687</div>
+      <div style="font-size:10px;color:var(--muted);margin-top:4px">acumulado 18 dias</div>
+    </div>
+    <div class="sc-card" id="sc-venc" onclick="selectScenario('venc')">
+      <div class="sc-icon">⚠️</div>
+      <div class="sc-title">Promoção vencimento</div>
+      <div class="sc-rate">Gelados 0% · Secos 3%</div>
+      <div class="sc-val" style="color:var(--red)">R$ 70</div>
+      <div style="font-size:10px;color:var(--muted);margin-top:4px">acumulado 18 dias</div>
+    </div>
+  </div>
+
+  <div style="background:var(--red-lt);border:1px solid var(--red-md);border-radius:var(--r);padding:12px 16px;margin-bottom:20px;font-size:12px;">
+    ⚠️ <strong>Atenção:</strong> Produto que vence sem ser identificado = você paga 100% do valor do lote. A aba Promoções protege isso.
+  </div>
+
+  <div class="section-label">Comissão por produto — cenário selecionado</div>
+  <div class="table-wrap">
+    <table><thead><tr><th>Produto</th><th>Categoria</th><th>Qtd (acum.)</th><th>Faturado</th><th>Taxa</th><th>Comissão</th></tr></thead>
+    <tbody id="comm-table-body"></tbody></table>
+    <div style="padding:10px 14px;background:var(--bg);border-top:1px solid var(--border);font-size:12px;font-weight:700;display:flex;justify-content:space-between;">
+      <span>TOTAL</span><span id="comm-table-total" style="color:var(--blue)">—</span>
+    </div>
+  </div>
+
+  <div class="section-label" style="margin-top:20px;">Projeção mês completo (30 dias)</div>
+  <div id="proj-mensal" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;"></div>
+</div>
+
+<!-- ═══════════ ALERTAS ═══════════ -->
+<div id="mod-alertas" class="module">
+  <div class="page-title">Alertas</div>
+  <div class="page-sub">Central de alertas operacionais · Joinville I</div>
+  <div class="alert-kpi-row">
+    <div class="a-kpi"><div class="a-kpi-val" style="color:var(--red)">3</div><div class="a-kpi-lbl">🚨 Críticos</div></div>
+    <div class="a-kpi"><div class="a-kpi-val" style="color:var(--amber)">4</div><div class="a-kpi-lbl">⚠️ Atenção</div></div>
+    <div class="a-kpi"><div class="a-kpi-val" style="color:var(--blue)">3</div><div class="a-kpi-lbl">ℹ️ Informativos</div></div>
+    <div class="a-kpi"><div class="a-kpi-val" style="color:var(--green)">✅</div><div class="a-kpi-lbl">Estoque auditado</div></div>
+  </div>
+  <div class="alert-list">
+    <div class="al-item crit"><div class="al-emoji">🍦</div><div><div class="al-title">Picolé Fruta Morango — 41 un. em estoque · ruptura iminente</div><div class="al-body">555 acumuladas em junho (31/dia). Estoque acaba em ~1 dia. Solicitar reposição urgente.</div></div></div>
+    <div class="al-item crit"><div class="al-emoji">🍡</div><div><div class="al-title">Picolé Creme Leite Condensado — ZERADO</div><div class="al-body">266 acumuladas em 18 dias (14,8/dia) com saldo zero. Solicitar 124 unidades imediatamente.</div></div></div>
+    <div class="al-item crit"><div class="al-emoji">🫐</div><div><div class="al-title">Açaí C/ Guaraná 180G — ZERADO · 4 vendas acumuladas</div><div class="al-body">Saldo zerou. Solicitar reposição. SKUs 45501/45711 disponíveis como substitutos.</div></div></div>
+    <div class="al-item warn"><div class="al-emoji">❄️</div><div><div class="al-title">Inverno SC — Ajuste de compras</div><div class="al-body">Jun–ago: queda esperada de 15-25% no giro de picolés de fruta. Não aumentar pedido de Paçoca (2.209 un.) e Chocotine (2.111 un.).</div></div></div>
+    <div class="al-item warn"><div class="al-emoji">💰</div><div><div class="al-title">Verifique o cenário de comissão do período</div><div class="al-body">Diferença de R$2.991 entre sem promoção (R$5.678) e promoção da fábrica (R$2.687). Confirme o cenário correto.</div></div></div>
+    <div class="al-item warn"><div class="al-emoji">🍡</div><div><div class="al-title">Picolé Mais Paçoca — estoque alto, giro baixo</div><div class="al-body">2.209 un. · 3,2/dia → ~690 dias de cobertura. Com inverno, risco de vencimento. Criar promoção já.</div></div></div>
+    <div class="al-item warn"><div class="al-emoji">🍦</div><div><div class="al-title">Picolé Chocotine — situação similar ao Paçoca</div><div class="al-body">2.111 un. · 3,2/dia → ~660 dias. Ação promocional necessária antes do inverno.</div></div></div>
+    <div class="al-item info"><div class="al-emoji">✅</div><div><div class="al-title">Estoque auditado e reconciliado · SC-4</div><div class="al-body">Planilha SC-4 de 18/06/2026 13:41. Saldos positivos para todos os produtos principais.</div></div></div>
+    <div class="al-item info"><div class="al-emoji">🆕</div><div><div class="al-title">3 novos SKUs sem histórico de venda</div><div class="al-body">AÇAÍ COM GUARANÁ 180G (45501), AÇAÍ COM BANANA 180G (45502), PICOLÉ LA SOBREMESA AÇAÍ COM LEITINHO (45715). Aguardar 2 semanas para avaliar demanda.</div></div></div>
+    <div class="al-item info"><div class="al-emoji">📊</div><div><div class="al-title">Faturamento acumulado junho: R$ 39.711,75 (18 dias)</div><div class="al-body">Top 5: Brasileirinho (777), Uva (702), Limão (650), Mini-Saia (612), Morango (555). Média R$2.206/dia.</div></div></div>
+  </div>
+</div>
+
+<!-- ═══════════ ESTOQUE ═══════════ -->
+<div id="mod-estoque" class="module">
+  <div class="page-title">Inventário</div>
+  <div class="page-sub">Estoque auditado SC-4 · 18/06/2026 · 166 SKUs</div>
+  <div class="chips">
+    <div class="chip on" onclick="filterStock('all',this)">Todos</div>
+    <div class="chip" onclick="filterStock('pos',this)">✅ Positivo</div>
+    <div class="chip" onclick="filterStock('zero',this)">⚪ Zerado</div>
+    <div class="chip" onclick="filterStock('picole',this)">🍡 Picolé</div>
+    <div class="chip" onclick="filterStock('pote',this)">🫙 Potes</div>
+    <div class="chip" onclick="filterStock('acai',this)">🫐 Açaí</div>
+    <div class="chip" onclick="filterStock('seco',this)">📦 Secos</div>
+    <input class="search-input" style="margin-left:auto;" type="text" placeholder="🔍 Buscar..." id="stock-search" oninput="searchStock(this.value)">
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Cód</th><th>Produto</th><th>Categoria</th><th>Preço</th><th>Saldo</th><th>Valor estoque</th><th>Vendas (acum.)</th><th>Fat. (acum.)</th><th>Giro/dia</th><th>Dias restantes</th><th>Status</th></tr></thead>
+      <tbody id="stock-tbody"></tbody>
+    </table>
+    <div style="padding:9px 14px;background:var(--bg);border-top:1px solid var(--border);font-size:11px;color:var(--muted);display:flex;justify-content:space-between;">
+      <span id="stock-count"></span>
+      <span>Auditado SC-4 · 18/06/2026 13:41</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ REPOSIÇÃO ═══════════ -->
+<div id="mod-reposicao" class="module">
+  <div class="page-title">Reposição Inteligente</div>
+  <div class="page-sub">Níveis de estoque baseados em giro real + sazonalidade · inverno aplica -20%</div>
+
+  <!-- Legenda -->
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px;">
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;border-left:3px solid var(--red);">
+      <div style="font-size:10px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">🔴 Estoque Mínimo</div>
+      <div style="font-size:11px;color:var(--muted)">Giro/dia × 3 dias (lead time). Abaixo = risco de ruptura.</div>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;border-left:3px solid var(--green);">
+      <div style="font-size:10px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">🟢 Estoque Atual</div>
+      <div style="font-size:11px;color:var(--muted)">Saldo auditado SC-4. Barra mostra % vs ideal.</div>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;border-left:3px solid var(--blue);">
+      <div style="font-size:10px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">🔵 Estoque Ideal</div>
+      <div style="font-size:11px;color:var(--muted)">Giro/dia × 14 dias. Cobertura recomendada.</div>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;border-left:3px solid var(--purple);">
+      <div style="font-size:10px;font-weight:700;color:var(--purple);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">🟣 Máximo Verão</div>
+      <div style="font-size:11px;color:var(--muted)">Giro × 30d × 1,4. Só usar dez–fev.</div>
+    </div>
+  </div>
+
+  <div class="chips">
+    <div class="chip on" id="rep-btn-inverno" onclick="setRepSeason('inverno',this)">❄️ Agora (Inverno –20%)</div>
+    <div class="chip" id="rep-btn-normal" onclick="setRepSeason('normal',this)">🍂 Média Anual</div>
+    <div class="chip" id="rep-btn-verao" onclick="setRepSeason('verao',this)">☀️ Verão (+40%)</div>
+    <span style="margin-left:auto;font-size:11px;color:var(--muted);font-style:italic" id="rep-season-label">Fator inverno ativo: giro × 0,80 + sem segunda</span>
+  </div>
+
+  <div class="rep-head"><span>Produto</span><span style="text-align:right">Giro/dia</span><span style="text-align:right">🔴 Mínimo</span><span>🟢 Atual (vs ideal)</span><span style="text-align:right">🔵 Ideal</span><span style="text-align:right">Pedido sugerido</span></div>
+  <div id="rep-grid"></div>
+</div>
+
+<!-- ═══════════ FREEZER ═══════════ -->
+<div id="mod-freezer" class="module">
+  <div class="page-title">Organização dos Freezers</div>
+  <div class="page-sub">Critério FIFO · posicionamento por giro real · Jun 1–18</div>
+  <div style="background:var(--blue-lt);border:1px solid var(--blue-md);border-radius:var(--r);padding:12px 16px;margin-bottom:18px;font-size:12px;">
+    <strong>🧊 FIFO aplicado</strong> — Maior giro = frente do freezer. Lotes novos entram por trás. Use data da NF de entrada como referência de validade.
+  </div>
+  <div class="fz-grid">
+    <div class="fz-card" style="border-top:3px solid var(--red)">
+      <div class="fz-header">⬆️ Frente <span style="font-size:10px;font-weight:500;color:var(--muted)">saída imediata</span></div>
+      <div class="fz-items">
+        <div class="fz-item"><span>🍡</span><span class="fn">Picolé Fruta Brasileirinho</span><span class="fq">777 acum. · 43/dia</span></div>
+        <div class="fz-item"><span>🍡</span><span class="fn">Picolé Fruta Uva</span><span class="fq">702 acum. · 39/dia</span></div>
+        <div class="fz-item"><span>🍡</span><span class="fn">Picolé Fruta Limão</span><span class="fq">650 acum. · 36/dia</span></div>
+        <div class="fz-item"><span>🍡</span><span class="fn">Picolé Fruta Mini-Saia</span><span class="fq">612 acum. · 34/dia</span></div>
+        <div class="fz-item" style="background:var(--red-lt)"><span>🍡</span><span class="fn">Picolé Fruta Morango ⚠️</span><span class="fq" style="color:var(--red)">555 · 41 est.</span></div>
+      </div>
+    </div>
+    <div class="fz-card" style="border-top:3px solid var(--amber)">
+      <div class="fz-header">🔼 Meio <span style="font-size:10px;font-weight:500;color:var(--muted)">rotação média</span></div>
+      <div class="fz-items">
+        <div class="fz-item"><span>🍡</span><span class="fn">Picolé Fruta Maracujá</span><span class="fq">545 acum. · 30/dia</span></div>
+        <div class="fz-item"><span>🍡</span><span class="fn">Picolé Fruta Framboesa</span><span class="fq">475 acum. · 26/dia</span></div>
+        <div class="fz-item"><span>🍡</span><span class="fn">Picolé Creme Morango</span><span class="fq">424 acum. · 23/dia</span></div>
+        <div class="fz-item"><span>🍡</span><span class="fn">Picolé Fruta Abacaxi</span><span class="fq">399 acum. · 22/dia</span></div>
+        <div class="fz-item"><span>🍡</span><span class="fn">Picolé Creme Milho Verde</span><span class="fq">305 acum. · 17/dia</span></div>
+      </div>
+    </div>
+    <div class="fz-card" style="border-top:3px solid var(--green)">
+      <div class="fz-header">🔽 Fundo <span style="font-size:10px;font-weight:500;color:var(--muted)">giro moderado</span></div>
+      <div class="fz-items">
+        <div class="fz-item"><span>🍡</span><span class="fn">Picolé Bombom Skimo</span><span class="fq">212 acum. · 12/dia</span></div>
+        <div class="fz-item"><span>🍡</span><span class="fn">Picolé Diamond Chocomalt</span><span class="fq">276 acum. · 15/dia</span></div>
+        <div class="fz-item"><span>🫙</span><span class="fn">Pote 2L Nata + Uva</span><span class="fq">163 acum. · 9/dia</span></div>
+        <div class="fz-item"><span>🫙</span><span class="fn">Pote 2L Coco + Milho Verde</span><span class="fq">112 acum. · 6/dia</span></div>
+        <div class="fz-item"><span>🍡</span><span class="fn">Picolé Mexicano Morango</span><span class="fq">147 acum. · 8/dia</span></div>
+      </div>
+    </div>
+    <div class="fz-card" style="border-top:3px solid #9CA3AF">
+      <div class="fz-header">📦 Reserva <span style="font-size:10px;font-weight:500;color:var(--muted)">monitorar vencimento</span></div>
+      <div class="fz-items">
+        <div class="fz-item" style="background:var(--amber-lt)"><span>🍡</span><span class="fn">Picolé Mais Paçoca ⚠️</span><span class="fq" style="color:var(--amber)">3,2/dia · 2.209 est.</span></div>
+        <div class="fz-item" style="background:var(--amber-lt)"><span>🍡</span><span class="fn">Picolé Chocotine ⚠️</span><span class="fq" style="color:var(--amber)">3,2/dia · 2.111 est.</span></div>
+        <div class="fz-item"><span>🍡</span><span class="fn">Picolé La Sobremesa Açaí</span><span class="fq">4/dia · 2.055 est.</span></div>
+        <div class="fz-item"><span>🫐</span><span class="fn">Açaí com Guaraná 5L</span><span class="fq">0/dia · 27 est.</span></div>
+        <div class="fz-item"><span>🥤</span><span class="fn">Best Cup 750ml (6 sabores)</span><span class="fq">giro baixo</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ PROMOÇÕES ═══════════ -->
+<div id="mod-promocoes" class="module">
+  <div class="page-title">Promoções Ativas</div>
+  <div class="page-sub">Gerencie promoções e veja o impacto na sua comissão em tempo real</div>
+
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px;">
+    <div class="a-kpi"><div class="a-kpi-val" style="color:var(--red)" id="pk-qtd">0</div><div class="a-kpi-lbl">Em promoção</div></div>
+    <div class="a-kpi"><div class="a-kpi-val" style="color:var(--amber)" id="pk-fat">R$0</div><div class="a-kpi-lbl">Fat. em promo</div></div>
+    <div class="a-kpi"><div class="a-kpi-val" style="color:var(--green)" id="pk-comm-sem">—</div><div class="a-kpi-lbl">Comissão s/ promos</div></div>
+    <div class="a-kpi"><div class="a-kpi-val" style="color:var(--blue)" id="pk-comm-com">—</div><div class="a-kpi-lbl">Comissão c/ promos</div></div>
+  </div>
+
+  <div class="card" style="margin-bottom:16px;">
+    <div class="card-title">➕ Registrar Promoção</div>
+    <div class="promo-form-grid">
+      <div class="form-field"><label>Produto</label><select id="promo-produto"><option value="">Selecione...</option></select></div>
+      <div class="form-field"><label>Tipo</label><select id="promo-tipo"><option value="fabrica">🏭 Fábrica (7%)</option><option value="vencimento">⚠️ Vencimento (0%)</option><option value="propria">💡 Minha promo (0%)</option></select></div>
+      <div class="form-field"><label>Preço Promo (R$)</label><input type="number" id="promo-preco" step="0.01" min="0" placeholder="0,00"></div>
+      <div class="form-field"><label>Obs / Motivo</label><input type="text" id="promo-obs" placeholder="ex: campanha junho"></div>
+      <button class="btn-primary" onclick="addPromo()">Adicionar</button>
+    </div>
+    <div style="background:var(--bg);border-radius:var(--r);padding:9px 12px;font-size:11px;color:var(--muted);">
+      💡 O pedido de comissão se ajusta automaticamente ao selecionar o tipo da promoção.
+    </div>
+  </div>
+
+  <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;">
+    <span>Promoções ativas</span>
+    <span style="font-size:11px;font-weight:500">Clique "Encerrar" quando o estoque acabar → volta para 15%</span>
+  </div>
+
+  <div id="promo-empty" style="text-align:center;padding:40px;background:var(--surface);border:1px dashed var(--border);border-radius:var(--r2);margin-bottom:16px;">
+    <div style="font-size:30px;margin-bottom:10px">🏷️</div>
+    <div style="font-size:14px;font-weight:700;margin-bottom:4px">Nenhuma promoção cadastrada</div>
+    <div style="font-size:12px;color:var(--muted)">Use o formulário acima para registrar</div>
+  </div>
+  <div id="promo-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px;"></div>
+
+  <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">Histórico</div>
+  <div id="promo-history"></div>
+</div>
+
+<!-- ═══════════ TEMPO ═══════════ -->
+<div id="mod-tempo" class="module">
+  <div class="page-title">Previsão do Tempo</div>
+  <div class="page-sub">Próximos 15 dias · Joinville SC · Impacto nas vendas · Seg = loja fechada (inverno)</div>
+
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px;">
+    <div class="a-kpi"><div class="a-kpi-val" style="color:var(--red)">13°C</div><div class="a-kpi-lbl">Temperatura agora</div></div>
+    <div class="a-kpi"><div class="a-kpi-val" style="color:var(--blue)">3</div><div class="a-kpi-lbl">Dias chuva forte</div></div>
+    <div class="a-kpi"><div class="a-kpi-val" style="color:var(--muted)">2</div><div class="a-kpi-lbl">Segundas fechadas</div></div>
+    <div class="a-kpi"><div class="a-kpi-val" style="color:var(--green)">10</div><div class="a-kpi-lbl">Dias de boas vendas</div></div>
+  </div>
+
+  <div class="section-label" style="margin-top:0">📅 Dia a dia — 18 Jun a 2 Jul 2026</div>
+  <div class="weather-strip" id="weather-grid"></div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px;">
+    <div class="al-item info"><div class="al-emoji">🌧️</div><div><div class="al-title">Chuva forte (prob. &gt;60%)</div><div class="al-body">Vendas caem 25-40%. Priorize potes 2L. Evite descongelar picolés extras. Prepare estoque para o dia seguinte.</div></div></div>
+    <div class="al-item info"><div class="al-emoji">🌤️</div><div><div class="al-title">Dia ensolarado pós-chuva</div><div class="al-body">Vendas sobem 15-30%. Tenha freezers organizados e frente abastecida com os top 5 picolés de fruta.</div></div></div>
+    <div class="al-item warn"><div class="al-emoji">🌡️</div><div><div class="al-title">Temperatura abaixo de 16°C</div><div class="al-body">Giro de picolés reduz 15-20%. Foque em potes e Açaí. Não peça extras de picolé fruta nesses dias.</div></div></div>
+    <div class="al-item warn"><div class="al-emoji">📅</div><div><div class="al-title">Segundas fechadas (22 e 29/jun)</div><div class="al-body">Use para: inventário físico, organização FIFO, análise semanal e preparação de pedido para a fábrica.</div></div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">💰 Impacto financeiro estimado — próximos 15 dias</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:4px;">
+      <div style="text-align:center;padding:14px;background:var(--green-lt);border-radius:var(--r);border:1px solid var(--green-md)">
+        <div style="font-size:10px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px">Otimista (13 dias)</div>
+        <div style="font-family:'Sora',sans-serif;font-size:22px;font-weight:800;color:var(--green)">R$ 19.800</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:3px">R$2.206 × 9 dias bons</div>
+      </div>
+      <div style="text-align:center;padding:14px;background:var(--amber-lt);border-radius:var(--r);border:1px solid var(--amber-md)">
+        <div style="font-size:10px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px">Real (c/ clima)</div>
+        <div style="font-family:'Sora',sans-serif;font-size:22px;font-weight:800;color:var(--amber)">R$ 14.900</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:3px">considera chuva e fechamentos</div>
+      </div>
+      <div style="text-align:center;padding:14px;background:var(--blue-lt);border-radius:var(--r);border:1px solid var(--blue-md)">
+        <div style="font-size:10px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px">Comissão (15%)</div>
+        <div style="font-family:'Sora',sans-serif;font-size:22px;font-weight:800;color:var(--blue)">R$ 2.100</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:3px">bruta · próximos 15 dias</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ UPLOAD ═══════════ -->
+<div id="mod-upload" class="module">
+  <div class="page-title">Atualizar Dados</div>
+  <div class="page-sub">Suba a planilha SC-X diária ou lance o faturamento do dia manualmente</div>
+
+  <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="handleDrop(event)">
+    <div class="upload-icon">📂</div>
+    <div class="upload-title">Arraste a planilha SC-X aqui</div>
+    <div class="upload-sub">ou clique para selecionar · XLSX, XLS</div>
+    <div style="margin-top:14px;display:inline-block;background:var(--ink);color:#fff;border-radius:6px;padding:8px 20px;font-size:12px;font-weight:700;">Selecionar arquivo</div>
+    <input type="file" id="file-input" class="upload-input" accept=".xlsx,.xls" onchange="handleFile(this.files[0])">
+  </div>
+
+  <div class="upload-result card" id="upload-result" style="display:none;margin-bottom:16px;background:var(--green-lt);border-color:var(--green-md);">
+    <div style="font-weight:700;color:var(--green);margin-bottom:8px;">✅ Planilha processada!</div>
+    <div id="upload-summary" style="font-size:12px;color:var(--muted);"></div>
+  </div>
+
+  <div class="card" style="margin-bottom:16px;">
+    <div class="card-title">📥 Lançar Vendas do Dia</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:14px;">Use enquanto não há integração automática. O sistema acumula sobre a base de Jun 1–18 e atualiza giro, estoque projetado e comissão.</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:10px;align-items:end;margin-bottom:12px;">
+      <div class="form-field"><label>Data</label><input type="date" id="daily-date"></div>
+      <div class="form-field"><label>Fat. Gelados (R$)</label><input type="number" id="daily-gelado" step="0.01" min="0" placeholder="ex: 2100,00"></div>
+      <div class="form-field"><label>Fat. Secos (R$)</label><input type="number" id="daily-seco" step="0.01" min="0" placeholder="ex: 130,00"></div>
+      <button class="btn-primary" onclick="addDailySale()">Lançar</button>
+    </div>
+    <div class="daily-accum-grid" id="daily-accum-display"></div>
+    <div id="daily-history"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📋 Histórico de Atualizações</div>
+    <div id="upload-history">
+      <div class="al-item info">
+        <div class="al-emoji">📋</div>
+        <div><div class="al-title">SC-4 · JOINVILLE I · 18/06/2026 13:41</div><div class="al-body">166 produtos importados. Estoque auditado. Valor total: R$ 417.134,25.</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+  </div><!-- content -->
+</div><!-- main -->
+</div><!-- app -->
+
+<script>
+
+
+// ═══ NAV ═══
+const PAGE_NAMES = {
+  dashboard: 'Dashboard',
+  comissao: 'Minha Comissão',
+  alertas: 'Alertas',
+  analytics: 'Análise de Vendas',
+  estoque: 'Inventário',
+  reposicao: 'Reposição',
+  freezer: 'Organização Freezer',
+  promocoes: 'Promoções Ativas',
+  tempo: 'Previsão do Tempo',
+  upload: 'Atualizar Dados'
+};
+
+function go(id, btn) {
+  document.querySelectorAll('.module').forEach(m => m.classList.remove('active'));
+  document.querySelectorAll('.sb-item').forEach(b => b.classList.remove('active'));
+  const mod = document.getElementById('mod-' + id);
+  if (mod) mod.classList.add('active');
+
+  // Update topbar page name
+  const pgEl = document.getElementById('topbar-page');
+  if (pgEl) pgEl.textContent = PAGE_NAMES[id] || id;
+
+  // Activate nav button
+  if (btn) {
+    btn.classList.add('active');
+  } else {
+    // Find by onclick attribute
+    const allBtns = document.querySelectorAll('.sb-item');
+    allBtns.forEach(b => {
+      if (b.getAttribute('onclick') && b.getAttribute('onclick').includes("'" + id + "'")) {
+        b.classList.add('active');
+      }
+    });
+  }
+
+  // Render analytics when tab is opened
+  if (id === 'analytics') renderAnalytics();
+}
+
+// ═══ DATE ═══
+(function() {
+  const now = new Date();
+  const el = document.getElementById('topbar-date');
+  if (el) el.textContent = now.toLocaleDateString('pt-BR', {weekday:'short',day:'2-digit',month:'short'});
+})();
+
+
+// ═══════════════════════
+// ANALYTICS CHARTS
+// ═══════════════════════
+
+const CHART_COLORS = [
+  '#C8372D','#1D4ED8','#1A7F5A','#A16207','#5B21B6',
+  '#0891B2','#BE185D','#B45309','#4338CA','#047857',
+  '#DC2626','#2563EB','#16A34A','#CA8A04','#7C3AED',
+  '#0284C7','#DB2777','#D97706','#4F46E5','#059669'
+];
+
+function renderBarH(containerId, items, valueKey, labelKey, colorFn, fmtFn) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  const max = Math.max(...items.map(i => i[valueKey]));
+  el.innerHTML = items.map((item, idx) => {
+    const pct = Math.round((item[valueKey] / max) * 100);
+    const color = typeof colorFn === 'function' ? colorFn(idx, item) : colorFn;
+    const val = fmtFn ? fmtFn(item[valueKey]) : item[valueKey];
+    return `<div class="bar-h-row">
+      <div class="bar-h-label" title="${item[labelKey]}">${item[labelKey]}</div>
+      <div class="bar-h-track">
+        <div class="bar-h-fill" style="width:${pct}%;background:${color}">
+          <span class="bar-h-fill-label">${val}</span>
+        </div>
+      </div>
+      <div class="bar-h-val">${val}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderAnalytics() {
+  const acc = getAccumulatedTotals();
+
+  // ── TOP 10 VOLUME ──
+  const top10vol = [...MERGED_DATA]
+    .filter(p => p.qty_vendida > 0)
+    .sort((a,b) => b.qty_vendida - a.qty_vendida)
+    .slice(0,10)
+    .map(p => ({ ...p, label: p.nome.length > 28 ? p.nome.slice(0,28)+'…' : p.nome }));
+
+  renderBarH('chart-top10-vol', top10vol, 'qty_vendida', 'label',
+    (i) => CHART_COLORS[i],
+    (v) => v.toLocaleString('pt-BR') + ' un.'
+  );
+
+  // ── TOP 10 FATURAMENTO ──
+  const top10fat = [...MERGED_DATA]
+    .filter(p => p.valor_vendido > 0)
+    .sort((a,b) => b.valor_vendido - a.valor_vendido)
+    .slice(0,10)
+    .map(p => ({ ...p, label: p.nome.length > 28 ? p.nome.slice(0,28)+'…' : p.nome }));
+
+  renderBarH('chart-top10-fat', top10fat, 'valor_vendido', 'label',
+    (i) => CHART_COLORS[i],
+    (v) => 'R$' + Math.round(v).toLocaleString('pt-BR')
+  );
+
+  // ── ESTOQUE vs VENDAS (dual bar) ──
+  const svs = [...MERGED_DATA]
+    .filter(p => p.qty_vendida > 0 || p.saldo > 0)
+    .sort((a,b) => b.qty_vendida - a.qty_vendida)
+    .slice(0,20);
+
+  const maxSvs = Math.max(...svs.map(p => Math.max(p.saldo, p.qty_vendida, 1)));
+  const svsEl = document.getElementById('chart-svs');
+  if (svsEl) {
+    svsEl.innerHTML = svs.map(p => {
+      const pctEst  = Math.min(100, Math.round((Math.max(p.saldo,0) / maxSvs) * 100));
+      const pctVend = Math.min(100, Math.round((p.qty_vendida / maxSvs) * 100));
+      const isRisk  = p.saldo < p.qty_vendida / acc.days * 7;
+      const lbl     = p.nome.length > 24 ? p.nome.slice(0,24)+'…' : p.nome;
+      return `<div class="svs-row">
+        <div class="svs-label" title="${p.nome}">${lbl}</div>
+        <div class="svs-bars">
+          <div class="svs-bar" style="width:${pctEst}%;background:${isRisk?'var(--red)':'var(--blue)'};" title="Estoque: ${p.saldo}"></div>
+          <div class="svs-bar" style="width:${pctVend}%;background:rgba(200,55,45,.25);" title="Vendas: ${p.qty_vendida}"></div>
+        </div>
+        <div class="svs-val" style="color:${isRisk?'var(--red)':'var(--muted)'};">${p.saldo}</div>
+      </div>`;
+    }).join('');
+  }
+
+  // ── CATEGORIA FAT (text-based) ──
+  const cats = {};
+  MERGED_DATA.forEach(p => {
+    const n = p.nome.toUpperCase();
+    let cat;
+    if (n.includes('PICOLÉ') && n.includes('FRUTA')) cat = 'Picolé Fruta';
+    else if (n.includes('PICOLÉ') && n.includes('CREME')) cat = 'Picolé Creme';
+    else if (n.includes('PICOLÉ') && n.includes('DIAMOND')) cat = 'Diamond';
+    else if (n.includes('PICOLÉ') && n.includes('BOMBOM')) cat = 'Bombom';
+    else if (n.includes('PICOLÉ') && (n.includes('MEXICANO')||n.includes('LA SOBREMESA'))) cat = 'Premium';
+    else if (n.includes('PICOLÉ')) cat = 'Picolé Outros';
+    else if (n.includes('POTE')) cat = 'Pote Sorvete';
+    else if (n.includes('AÇAÍ')||n.includes('ACAI')) cat = 'Açaí';
+    else if (n.includes('CONE')||n.includes('SUNDAE')||n.includes('COPINHO')) cat = 'Cone/Sundae';
+    else cat = 'Outros';
+    cats[cat] = (cats[cat] || 0) + p.valor_vendido;
+  });
+
+  const catArr = Object.entries(cats)
+    .filter(([,v]) => v > 0)
+    .sort((a,b) => b[1]-a[1]);
+
+  const totalFat = catArr.reduce((s,[,v]) => s+v, 0);
+  const catEl = document.getElementById('chart-cat-fat');
+  if (catEl) {
+    catEl.innerHTML = catArr.map(([cat, val], i) => {
+      const pct = Math.round((val/totalFat)*100);
+      return `<div class="donut-leg-row">
+        <div class="donut-leg-dot" style="background:${CHART_COLORS[i]};border-radius:2px;"></div>
+        <span style="font-size:11px;font-weight:500;flex:1">${cat}</span>
+        <span style="font-size:10px;color:var(--muted)">${pct}%</span>
+        <span class="donut-leg-val">R$${Math.round(val).toLocaleString('pt-BR')}</span>
+      </div>`;
+    }).join('');
+  }
+
+  // ── GIRO DIÁRIO TOP 15 ──
+  const giro = [...MERGED_DATA]
+    .filter(p => p.qty_vendida >= 5)
+    .map(p => ({ ...p, dr: dailyRate(p) }))
+    .sort((a,b) => b.dr-a.dr)
+    .slice(0,15)
+    .map(p => ({ label: p.nome.length>24?p.nome.slice(0,24)+'…':p.nome, qty_vendida: Math.round(p.dr*10)/10 }));
+
+  renderBarH('chart-giro', giro, 'qty_vendida', 'label',
+    (i) => CHART_COLORS[i % CHART_COLORS.length],
+    (v) => v + '/dia'
+  );
+
+  // ── COBERTURA (dias restantes) ──
+  const cob = [...MERGED_DATA]
+    .filter(p => p.saldo > 0 && p.qty_vendida >= 5)
+    .map(p => {
+      const d = daysLeft(p);
+      return { ...p, days: d, label: p.nome.length>24?p.nome.slice(0,24)+'…':p.nome };
+    })
+    .sort((a,b) => a.days - b.days)
+    .slice(0,15);
+
+  const cobEl = document.getElementById('chart-cobertura');
+  if (cobEl && cob.length > 0) {
+    const maxD = Math.min(Math.max(...cob.map(p=>p.days)), 90);
+    cobEl.innerHTML = cob.map(p => {
+      const pct = Math.round((Math.min(p.days,90)/90)*100);
+      const color = p.days<5?'var(--red)':p.days<14?'var(--amber)':'var(--green)';
+      return `<div class="bar-h-row">
+        <div class="bar-h-label" title="${p.nome}">${p.label}</div>
+        <div class="bar-h-track">
+          <div class="bar-h-fill" style="width:${pct}%;background:${color}">
+            <span class="bar-h-fill-label">${p.days}d</span>
+          </div>
+        </div>
+        <div class="bar-h-val" style="color:${color}">${p.days}d</div>
+      </div>`;
+    }).join('');
+  }
+}
+
+
+// DATA
+const MERGED_DATA=[
+{cod:43341,nome:"PICOLÉ FRUTA MARACUJÁ",saldo:2617,valor_un:1.00,qty_vendida:545,valor_vendido:545.00,preco_unit_venda:1.00,categoria:"gelado"},
+{cod:24021,nome:"PICOLÉ FRUTA LIMÃO",saldo:2586,valor_un:1.00,qty_vendida:650,valor_vendido:650.00,preco_unit_venda:1.00,categoria:"gelado"},
+{cod:24019,nome:"PICOLÉ FRUTA FRAMBOESA",saldo:2518,valor_un:1.00,qty_vendida:475,valor_vendido:475.00,preco_unit_venda:1.00,categoria:"gelado"},
+{cod:24023,nome:"PICOLÉ FRUTA UVA",saldo:2329,valor_un:1.00,qty_vendida:702,valor_vendido:702.00,preco_unit_venda:1.00,categoria:"gelado"},
+{cod:24059,nome:"PICOLÉ MAIS PAÇOCA",saldo:2209,valor_un:4.50,qty_vendida:57,valor_vendido:256.50,preco_unit_venda:4.50,categoria:"gelado"},
+{cod:44899,nome:"PICOLÉ CHOCOTINE",saldo:2111,valor_un:6.50,qty_vendida:57,valor_vendido:370.50,preco_unit_venda:6.50,categoria:"gelado"},
+{cod:45715,nome:"PICOLÉ LA SOBREMESA AÇAÍ COM LEITINHO",saldo:2055,valor_un:4.50,qty_vendida:73,valor_vendido:328.50,preco_unit_venda:4.50,categoria:"gelado"},
+{cod:24022,nome:"PICOLÉ FRUTA MINI-SAIA",saldo:2027,valor_un:1.00,qty_vendida:612,valor_vendido:612.00,preco_unit_venda:1.00,categoria:"gelado"},
+{cod:24035,nome:"PICOLÉ CREME MILHO VERDE",saldo:1973,valor_un:3.00,qty_vendida:305,valor_vendido:915.00,preco_unit_venda:3.00,categoria:"gelado"},
+{cod:42077,nome:"PICOLÉ TURMA DA MONICA MAÇÃ VERDE",saldo:1861,valor_un:2.50,qty_vendida:28,valor_vendido:70.00,preco_unit_venda:2.50,categoria:"gelado"},
+{cod:42076,nome:"PICOLÉ TURMA DA MONICA MORANGO",saldo:1847,valor_un:2.50,qty_vendida:54,valor_vendido:135.00,preco_unit_venda:2.50,categoria:"gelado"},
+{cod:24043,nome:"PICOLÉ CREME SPECIALE CHOCOLATE",saldo:1817,valor_un:4.50,qty_vendida:12,valor_vendido:54.00,preco_unit_venda:4.50,categoria:"gelado"},
+{cod:36972,nome:"PICOLÉ CREME NATA",saldo:1764,valor_un:3.00,qty_vendida:80,valor_vendido:240.00,preco_unit_venda:3.00,categoria:"gelado"},
+{cod:43338,nome:"PICOLÉ LA SOBREMESA LIMONADA SUÍÇA",saldo:1708,valor_un:4.50,qty_vendida:18,valor_vendido:81.00,preco_unit_venda:4.50,categoria:"gelado"},
+{cod:24017,nome:"PICOLÉ FRUTA ABACAXI",saldo:1634,valor_un:1.00,qty_vendida:399,valor_vendido:399.00,preco_unit_venda:1.00,categoria:"gelado"},
+{cod:24048,nome:"PICOLÉ BOMBOM NO PALITO SKIMO",saldo:1611,valor_un:6.00,qty_vendida:212,valor_vendido:1272.00,preco_unit_venda:6.00,categoria:"gelado"},
+{cod:30749,nome:"PICOLÉ KIDS PICOLÁPIS SURPRESA",saldo:1543,valor_un:1.00,qty_vendida:141,valor_vendido:141.00,preco_unit_venda:1.00,categoria:"gelado"},
+{cod:24033,nome:"PICOLÉ CREME CHOCOLATE",saldo:1504,valor_un:3.00,qty_vendida:224,valor_vendido:672.00,preco_unit_venda:3.00,categoria:"gelado"},
+{cod:24058,nome:"PICOLÉ MAIS CÔCO",saldo:1445,valor_un:4.50,qty_vendida:145,valor_vendido:652.50,preco_unit_venda:4.50,categoria:"gelado"},
+{cod:29925,nome:"PICOLÉ LA SOBREMESA QUATRO LEITES",saldo:1370,valor_un:4.50,qty_vendida:33,valor_vendido:148.50,preco_unit_venda:4.50,categoria:"gelado"},
+{cod:24036,nome:"PICOLÉ CREME MORANGO",saldo:1347,valor_un:1.75,qty_vendida:424,valor_vendido:742.00,preco_unit_venda:1.75,categoria:"gelado"},
+{cod:24047,nome:"PICOLÉ BOMBOM NO PALITO BRIGADEIRO",saldo:1299,valor_un:6.00,qty_vendida:121,valor_vendido:726.00,preco_unit_venda:6.00,categoria:"gelado"},
+{cod:24121,nome:"PICOLÉ ZERO AÇÚCAR CHOCOLATE",saldo:1275,valor_un:4.50,qty_vendida:52,valor_vendido:234.00,preco_unit_venda:4.50,categoria:"gelado"},
+{cod:24067,nome:"PICOLÉ DIAMOND CHOCOMALT",saldo:1247,valor_un:6.00,qty_vendida:276,valor_vendido:720.00,preco_unit_venda:2.61,categoria:"gelado"},
+{cod:42078,nome:"PICOLÉ TURMA DA MONICA TUTTI-FRUTTI",saldo:1241,valor_un:2.50,qty_vendida:41,valor_vendido:102.50,preco_unit_venda:2.50,categoria:"gelado"},
+{cod:24122,nome:"PICOLÉ ZERO AÇÚCAR CÔCO",saldo:1237,valor_un:4.50,qty_vendida:52,valor_vendido:234.00,preco_unit_venda:4.50,categoria:"gelado"},
+{cod:24034,nome:"PICOLÉ CREME CÔCO BRANCO",saldo:1202,valor_un:3.00,qty_vendida:156,valor_vendido:468.00,preco_unit_venda:3.00,categoria:"gelado"},
+{cod:24018,nome:"PICOLÉ FRUTA BRASILEIRINHO",saldo:1183,valor_un:1.00,qty_vendida:777,valor_vendido:777.00,preco_unit_venda:1.00,categoria:"gelado"},
+{cod:41784,nome:"PICOLÉ CREME DOCE DE LEITE",saldo:1181,valor_un:3.00,qty_vendida:90,valor_vendido:270.00,preco_unit_venda:3.00,categoria:"gelado"},
+{cod:24052,nome:"PICOLÉ GREGO FRUTAS VERMELHAS",saldo:1147,valor_un:4.50,qty_vendida:47,valor_vendido:211.50,preco_unit_venda:4.50,categoria:"gelado"},
+{cod:24069,nome:"PICOLÉ DIAMOND COOKIES BIANCO",saldo:1064,valor_un:6.00,qty_vendida:96,valor_vendido:576.00,preco_unit_venda:6.00,categoria:"gelado"},
+{cod:37488,nome:"PICOLÉ LA SOBREMESA PUDIM DE LEITE",saldo:1049,valor_un:4.50,qty_vendida:29,valor_vendido:130.50,preco_unit_venda:4.50,categoria:"gelado"},
+{cod:41604,nome:"PICOLÉ DIAMOND FRUTAS VERMELHAS",saldo:1026,valor_un:6.00,qty_vendida:36,valor_vendido:216.00,preco_unit_venda:6.00,categoria:"gelado"},
+{cod:24092,nome:"PICOLÉ ITUZINHO LEITINHO TRUFADO",saldo:1012,valor_un:4.50,qty_vendida:27,valor_vendido:121.50,preco_unit_venda:4.50,categoria:"gelado"},
+{cod:24112,nome:"PICOLÉ KIDS UNICÓRNIO",saldo:991,valor_un:5.00,qty_vendida:27,valor_vendido:135.00,preco_unit_venda:5.00,categoria:"gelado"},
+{cod:40042,nome:"PICOLÉ COCO QUEIMADO",saldo:955,valor_un:4.50,qty_vendida:94,valor_vendido:423.00,preco_unit_venda:4.50,categoria:"gelado"},
+{cod:39523,nome:"PICOLÉ PATRICK",saldo:939,valor_un:5.00,qty_vendida:29,valor_vendido:142.50,preco_unit_venda:4.91,categoria:"gelado"},
+{cod:24081,nome:"PICOLÉ MEXICANO MARACUJÁ",saldo:936,valor_un:6.50,qty_vendida:99,valor_vendido:643.50,preco_unit_venda:6.50,categoria:"gelado"},
+{cod:29926,nome:"PICOLÉ LA SOBREMESA SAGU",saldo:930,valor_un:4.50,qty_vendida:96,valor_vendido:432.00,preco_unit_venda:4.50,categoria:"gelado"},
+{cod:24082,nome:"PICOLÉ MEXICANO MORANGO",saldo:928,valor_un:6.50,qty_vendida:147,valor_vendido:955.50,preco_unit_venda:6.50,categoria:"gelado"},
+{cod:39522,nome:"PICOLÉ BOB ESPONJA",saldo:849,valor_un:5.00,qty_vendida:56,valor_vendido:280.00,preco_unit_venda:5.00,categoria:"gelado"},
+{cod:24068,nome:"PICOLÉ DIAMOND COOKIES",saldo:823,valor_un:6.00,qty_vendida:110,valor_vendido:660.00,preco_unit_venda:6.00,categoria:"gelado"},
+{cod:24099,nome:"COPINHO GOURMET BOMBOM DE CÔCO",saldo:771,valor_un:4.50,qty_vendida:7,valor_vendido:31.50,preco_unit_venda:4.50,categoria:"gelado"},
+{cod:8894,nome:"CASCÃO PAC. C/ 10 UN",saldo:762,valor_un:9.00,qty_vendida:122,valor_vendido:1098.00,preco_unit_venda:9.00,categoria:"seco"},
+{cod:24100,nome:"COPINHO GOURMET CARAMELO SALGADO",saldo:554,valor_un:4.50,qty_vendida:15,valor_vendido:67.50,preco_unit_venda:4.50,categoria:"gelado"},
+{cod:8803,nome:"PICOLÉ SUPER BARRITA",saldo:490,valor_un:6.50,qty_vendida:84,valor_vendido:546.00,preco_unit_venda:6.50,categoria:"gelado"},
+{cod:24125,nome:"CONE SELETTO BRIGADEIRO",saldo:488,valor_un:7.50,qty_vendida:21,valor_vendido:157.50,preco_unit_venda:7.50,categoria:"gelado"},
+{cod:24102,nome:"COPINHO GOURMET MORANGO AO LEITE",saldo:442,valor_un:4.50,qty_vendida:20,valor_vendido:90.00,preco_unit_venda:4.50,categoria:"gelado"},
+{cod:41603,nome:"PICOLÉ DIAMOND PISTACHE",saldo:435,valor_un:6.00,qty_vendida:33,valor_vendido:198.00,preco_unit_venda:6.00,categoria:"gelado"},
+{cod:44391,nome:"CONE SELETTO PISTACHE",saldo:417,valor_un:7.50,qty_vendida:2,valor_vendido:15.00,preco_unit_venda:7.50,categoria:"gelado"},
+{cod:41665,nome:"AÇAÍ C/ BANANA 180G",saldo:375,valor_un:13.00,qty_vendida:2,valor_vendido:26.00,preco_unit_venda:13.00,categoria:"gelado"},
+{cod:24009,nome:"SUNDAE FRUTO DO BOSCO",saldo:356,valor_un:6.75,qty_vendida:13,valor_vendido:87.75,preco_unit_venda:6.75,categoria:"gelado"},
+{cod:45711,nome:"AÇAÍ COM GUARANÁ 180G + COMPOSTO LACTEO",saldo:320,valor_un:14.00,qty_vendida:9,valor_vendido:126.00,preco_unit_venda:14.00,categoria:"gelado"},
+{cod:24126,nome:"CONE SELETTO CROCANTE",saldo:257,valor_un:7.50,qty_vendida:14,valor_vendido:105.00,preco_unit_venda:7.50,categoria:"gelado"},
+{cod:24103,nome:"COPINHO GOURMET TORTA DE LIMÃO",saldo:247,valor_un:4.50,qty_vendida:10,valor_vendido:45.00,preco_unit_venda:4.50,categoria:"gelado"},
+{cod:9070,nome:"NAPOLICUP 250ML",saldo:212,valor_un:6.75,qty_vendida:42,valor_vendido:283.50,preco_unit_venda:6.75,categoria:"gelado"},
+{cod:24142,nome:"POTE SORVETE 2L CHOCOLATE BRANCO",saldo:206,valor_un:19.00,qty_vendida:39,valor_vendido:741.00,preco_unit_venda:19.00,categoria:"gelado"},
+{cod:45501,nome:"AÇAÍ COM GUARANÁ 180G",saldo:204,valor_un:13.00,qty_vendida:0,valor_vendido:0.00,preco_unit_venda:13.00,categoria:"gelado"},
+{cod:35101,nome:"COBERTURA FRUTAS VERMELHAS 270G",saldo:190,valor_un:8.50,qty_vendida:3,valor_vendido:25.50,preco_unit_venda:8.50,categoria:"seco"},
+{cod:24146,nome:"POTE SORVETE 2L MORANGO",saldo:187,valor_un:19.00,qty_vendida:28,valor_vendido:532.00,preco_unit_venda:19.00,categoria:"gelado"},
+{cod:24144,nome:"POTE SORVETE 2L LEITINHO TRUFADO",saldo:183,valor_un:28.00,qty_vendida:17,valor_vendido:476.00,preco_unit_venda:28.00,categoria:"gelado"},
+{cod:24149,nome:"POTE SORVETE 2L TRUFA",saldo:183,valor_un:28.00,qty_vendida:17,valor_vendido:476.00,preco_unit_venda:28.00,categoria:"gelado"},
+{cod:27086,nome:"COBERTURA CHOCOLATE 270G",saldo:180,valor_un:8.50,qty_vendida:21,valor_vendido:178.50,preco_unit_venda:8.50,categoria:"seco"},
+{cod:24148,nome:"POTE SORVETE 2L TRAMONTARO",saldo:176,valor_un:28.00,qty_vendida:6,valor_vendido:168.00,preco_unit_venda:28.00,categoria:"gelado"},
+{cod:44203,nome:"POTE SORVETE 2L CEREJA E AMARENA",saldo:175,valor_un:28.00,qty_vendida:9,valor_vendido:252.00,preco_unit_venda:28.00,categoria:"gelado"},
+{cod:24143,nome:"POTE SORVETE 2L FLOCOS",saldo:171,valor_un:28.00,qty_vendida:29,valor_vendido:812.00,preco_unit_venda:28.00,categoria:"gelado"},
+{cod:24147,nome:"POTE SORVETE 2L NAPOLITANO",saldo:168,valor_un:28.00,qty_vendida:23,valor_vendido:644.00,preco_unit_venda:28.00,categoria:"gelado"},
+{cod:36452,nome:"SUNDAE BAUNILHA COM CHOCOTELLA",saldo:164,valor_un:6.75,qty_vendida:22,valor_vendido:148.50,preco_unit_venda:6.75,categoria:"gelado"},
+{cod:30998,nome:"AÇAÍ C/ GUARANÁ 1L",saldo:159,valor_un:29.00,qty_vendida:13,valor_vendido:377.00,preco_unit_venda:29.00,categoria:"gelado"},
+{cod:24168,nome:"POTE SORVETE 1,5L NEVADO GREGO C/ AMORA",saldo:149,valor_un:23.50,qty_vendida:26,valor_vendido:611.00,preco_unit_venda:23.50,categoria:"gelado"},
+{cod:24131,nome:"POTE SORVETE 2L BRIGADEIRO",saldo:141,valor_un:28.00,qty_vendida:15,valor_vendido:420.00,preco_unit_venda:28.00,categoria:"gelado"},
+{cod:24151,nome:"POTE SORVETE 2L COCO + MILHO VERDE",saldo:141,valor_un:15.00,qty_vendida:112,valor_vendido:1680.00,preco_unit_venda:15.00,categoria:"gelado"},
+{cod:44967,nome:"DISPLAY CHICLETE FRULETS 7G",saldo:136,valor_un:0.50,qty_vendida:116,valor_vendido:58.00,preco_unit_venda:0.50,categoria:"seco"},
+{cod:24150,nome:"POTE SORVETE 2L CREME",saldo:135,valor_un:19.00,qty_vendida:45,valor_vendido:855.00,preco_unit_venda:19.00,categoria:"gelado"},
+{cod:24157,nome:"POTE SORVETE 2L CHOCOMENTA XADREZ",saldo:116,valor_un:28.00,qty_vendida:9,valor_vendido:252.00,preco_unit_venda:28.00,categoria:"gelado"},
+{cod:24145,nome:"POTE SORVETE 2L MARTA ROCHA",saldo:115,valor_un:28.00,qty_vendida:7,valor_vendido:196.00,preco_unit_venda:28.00,categoria:"gelado"},
+{cod:44897,nome:"POTE SORVETE 2L CAPPUCCINO",saldo:115,valor_un:28.00,qty_vendida:9,valor_vendido:252.00,preco_unit_venda:28.00,categoria:"gelado"},
+{cod:30999,nome:"AÇAÍ C/ BANANA 1L",saldo:110,valor_un:29.00,qty_vendida:6,valor_vendido:174.00,preco_unit_venda:29.00,categoria:"gelado"},
+{cod:24153,nome:"POTE SORVETE 2L NATA + UVA",saldo:109,valor_un:15.00,qty_vendida:163,valor_vendido:2445.00,preco_unit_venda:15.00,categoria:"gelado"},
+{cod:27176,nome:"POTE SORVETE 2L CREME + FLOCOS + CHOCOLATE",saldo:107,valor_un:28.00,qty_vendida:21,valor_vendido:588.00,preco_unit_venda:28.00,categoria:"gelado"},
+{cod:27085,nome:"COBERTURA CARAMELO 270G",saldo:100,valor_un:8.50,qty_vendida:5,valor_vendido:42.50,preco_unit_venda:8.50,categoria:"seco"},
+{cod:44204,nome:"BEST CUP 750ML CHOCOLATE DUBAI",saldo:90,valor_un:19.50,qty_vendida:5,valor_vendido:97.50,preco_unit_venda:19.50,categoria:"gelado"},
+{cod:24130,nome:"POTE SORVETE 2L BANANA C/ CHOCOTELA",saldo:67,valor_un:19.00,qty_vendida:62,valor_vendido:1178.00,preco_unit_venda:19.00,categoria:"gelado"},
+{cod:27087,nome:"COBERTURA MORANGO 270G",saldo:45,valor_un:8.50,qty_vendida:17,valor_vendido:144.50,preco_unit_venda:8.50,categoria:"seco"},
+{cod:43340,nome:"PICOLÉ FRUTA MORANGO",saldo:41,valor_un:1.00,qty_vendida:555,valor_vendido:555.00,preco_unit_venda:1.00,categoria:"gelado"},
+{cod:32101,nome:"ROLINHO WAFFER TUB-IN BRIGADEIRO",saldo:41,valor_un:3.50,qty_vendida:11,valor_vendido:38.50,preco_unit_venda:3.50,categoria:"gelado"},
+{cod:31911,nome:"ROLINHO WAFFER TUB-IN TRUFA",saldo:37,valor_un:3.50,qty_vendida:24,valor_vendido:84.00,preco_unit_venda:3.50,categoria:"gelado"},
+{cod:36378,nome:"TIGELA PARA SORVETES C/ PAZINHA",saldo:62,valor_un:8.00,qty_vendida:13,valor_vendido:68.00,preco_unit_venda:5.23,categoria:"seco"},
+{cod:47242,nome:"SACOLA NEOBAG LISA VERMELHA",saldo:6,valor_un:2.00,qty_vendida:12,valor_vendido:24.00,preco_unit_venda:2.00,categoria:"seco"},
+{cod:43499,nome:"GOMETS MINHOCA ACIDA 100G",saldo:42,valor_un:4.50,qty_vendida:13,valor_vendido:39.80,preco_unit_venda:3.06,categoria:"seco"},
+{cod:43497,nome:"GOMETS ANEL 100G",saldo:28,valor_un:4.50,qty_vendida:10,valor_vendido:31.40,preco_unit_venda:3.14,categoria:"seco"},
+{cod:43496,nome:"GOMETS 100G",saldo:17,valor_un:4.50,qty_vendida:14,valor_vendido:39.20,preco_unit_venda:2.80,categoria:"seco"},
+{cod:31908,nome:"ROLINHO WAFFER TUB-IN CHOCOLATE",saldo:16,valor_un:3.50,qty_vendida:13,valor_vendido:45.50,preco_unit_venda:3.50,categoria:"gelado"},
+{cod:31910,nome:"ROLINHO WAFFER TUB-IN NAPOLITANO",saldo:50,valor_un:3.50,qty_vendida:10,valor_vendido:35.00,preco_unit_venda:3.50,categoria:"gelado"},
+{cod:24091,nome:"PICOLÉ ITUZINHO CHICLETES",saldo:1090,valor_un:4.50,qty_vendida:33,valor_vendido:148.50,preco_unit_venda:4.50,categoria:"gelado"},
+{cod:24037,nome:"PICOLÉ CREME LEITE CONDENSADO",saldo:0,valor_un:1.75,qty_vendida:266,valor_vendido:465.50,preco_unit_venda:1.75,categoria:"gelado"},
+{cod:41629,nome:"AÇAÍ C/ GUARANÁ 180G",saldo:0,valor_un:13.00,qty_vendida:4,valor_vendido:52.00,preco_unit_venda:13.00,categoria:"gelado"},
+{cod:44397,nome:"POTE SORVETE 2L MOUSSE DE MARACUJÁ",saldo:56,valor_un:28.00,qty_vendida:9,valor_vendido:252.00,preco_unit_venda:28.00,categoria:"gelado"},
+{cod:45713,nome:"AÇAÍ COM GUARANÁ 5L",saldo:27,valor_un:127.00,qty_vendida:0,valor_vendido:0.00,preco_unit_venda:127.00,categoria:"gelado"},
+{cod:22300,nome:"CAMISETA LOJISTA EG",saldo:0,valor_un:30.00,qty_vendida:3,valor_vendido:90.00,preco_unit_venda:30.00,categoria:"seco"},
+{cod:40004,nome:"CAMISETA CINZA ESKIMO G",saldo:12,valor_un:35.00,qty_vendida:2,valor_vendido:70.00,preco_unit_venda:35.00,categoria:"seco"},
+{cod:40005,nome:"CAMISETA CINZA ESKIMO GG",saldo:11,valor_un:35.00,qty_vendida:2,valor_vendido:70.00,preco_unit_venda:35.00,categoria:"seco"},
+{cod:1236,nome:"BOLSA TERMICA",saldo:1,valor_un:25.00,qty_vendida:3,valor_vendido:75.00,preco_unit_venda:25.00,categoria:"seco"}
+];
+
+// ═══════════════════════════════════
+// VENDAS — PERÍODO ACUMULADO
+// Base: Junho 1–18 (18 dias, relatório SC-4)
+// A partir do dia 19, entradas diárias somam ao acumulado
+// ═══════════════════════════════════
+const BASE_PERIOD_DAYS = 18;           // dias do relatório base
+const BASE_DATE = '2026-06-18';        // data do último relatório
+const TOTAL_GELADO_BASE = 37394.75;
+const TOTAL_SECO_BASE   = 2317.00;
+
+// Vendas diárias adicionadas pelo usuário (persistidas)
+// Estrutura: { 'YYYY-MM-DD': { gelado: R$, seco: R$, products: [{cod, qty, valor}] } }
+let dailySales = {};
+try {
+  const s = localStorage.getItem('eskimo_daily_sales_v1');
+  if (s) dailySales = JSON.parse(s);
+} catch(e) { dailySales = {}; }
+
+function saveDailySales() {
+  try { localStorage.setItem('eskimo_daily_sales_v1', JSON.stringify(dailySales)); } catch(e) {}
+}
+
+// Total acumulado = base + todas as entradas diárias
+function getAccumulatedTotals() {
+  let gelado = TOTAL_GELADO_BASE;
+  let seco    = TOTAL_SECO_BASE;
+  let days    = BASE_PERIOD_DAYS;
+  Object.values(dailySales).forEach(d => {
+    gelado += (d.gelado || 0);
+    seco   += (d.seco   || 0);
+    days   += 1;
+  });
+  return { gelado, seco, total: gelado + seco, days };
+}
+
+// For each product, accumulated qty = base + daily additions
+function getProductAccumQty(cod) {
+  const base = MERGED_DATA.find(p => p.cod === cod);
+  let qty = base ? base.qty_vendida : 0;
+  Object.values(dailySales).forEach(d => {
+    if (d.products) {
+      const entry = d.products.find(p => p.cod === cod);
+      if (entry) qty += (entry.qty || 0);
+    }
+  });
+  return qty;
+}
+
+function getProductAccumValor(cod) {
+  const base = MERGED_DATA.find(p => p.cod === cod);
+  let valor = base ? base.valor_vendido : 0;
+  Object.values(dailySales).forEach(d => {
+    if (d.products) {
+      const entry = d.products.find(p => p.cod === cod);
+      if (entry) valor += (entry.valor || 0);
+    }
+  });
+  return valor;
+}
+
+// Daily rate = total accumulated qty / total days
+function dailyRate(p) {
+  const totalDays = getAccumulatedTotals().days;
+  const totalQty = getProductAccumQty(p.cod);
+  return totalQty / totalDays;
+}
+
+const PERIOD_DAYS = BASE_PERIOD_DAYS; // kept for compatibility
+const TOTAL_GELADO = TOTAL_GELADO_BASE;
+const TOTAL_SECO   = TOTAL_SECO_BASE;
+const TOTAL_FAT    = TOTAL_GELADO_BASE + TOTAL_SECO_BASE; // Junho 1-18 (dados acumulados do mês, NÃO do dia)
+const DAILY_FAT=Math.round(TOTAL_FAT/PERIOD_DAYS*100)/100; // R$2.206/dia
+let currentScenario='normal';
+
+// COMMISSION RATES
+const RATES={normal:{gelado:.15,seco:.03},promo:{gelado:.07,seco:.03},venc:{gelado:0,seco:.03}};
+
+function calcComm(scenario){
+  const r=RATES[scenario];
+  return TOTAL_GELADO*r.gelado + TOTAL_SECO*r.seco;
+}
+
+function fmtR(v){return 'R$ '+v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function fmtN(v){return v.toLocaleString('pt-BR');}
+
+// NAV
+// DATE
+(function(){const now=new Date();const el=document.getElementById('topbar-date');if(el)el.textContent=now.toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'short',year:'numeric'});})();
+
+// INIT DASHBOARD STATS
+(function initStats(){
+  const pos=MERGED_DATA.filter(p=>p.saldo>0).length;
+  const zero=MERGED_DATA.filter(p=>p.saldo<=0).length;
+  const rup=MERGED_DATA.filter(p=>p.saldo>0&&p.qty_vendida>0&&(p.saldo/p.qty_vendida)<5).length;
+  ['h-pos','leg-pos'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=pos;});
+  ['h-zero','leg-zero'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=zero;});
+  ['h-ruptura','leg-rup'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=rup;});
+  const commEl=document.getElementById('kpi-comm');
+  if(commEl)commEl.textContent='R$'+Math.round(calcComm('normal')/1000)+'k';
+})();
+
+// DAYS LEFT
+// dailyRate defined below in accumulated system
+function daysLeft(p){
+  const d=dailyRate(p);
+  if(d<=0)return p.saldo>0?999:0;
+  if(p.saldo<=0)return 0;
+  return Math.floor(p.saldo/d);
+}
+function suggestOrder(p){
+  const ideal=Math.ceil(dailyRate(p)*14);
+  return Math.max(0,ideal-Math.max(p.saldo,0));
+}
+
+// STOCKOUT ROWS
+function renderStockout(){
+  const data=MERGED_DATA.filter(p=>p.qty_vendida>=5||p.saldo<=0).map(p=>({...p,days:daysLeft(p)}));
+  const rupt=data.filter(p=>p.saldo<=0).sort((a,b)=>b.qty_vendida-a.qty_vendida).slice(0,4);
+  const pos=data.filter(p=>p.saldo>0).sort((a,b)=>a.days-b.days).slice(0,8);
+  const rows=[...rupt,...pos];
+  const maxD=70;
+  const el=document.getElementById('stockout-rows');
+  if(!el)return;
+  el.innerHTML=rows.map(p=>{
+    const d=p.days;
+    let cls,badgeCls,badgeTxt,color,pct;
+    if(p.saldo<=0){cls='urgent';badgeCls='b-urg';badgeTxt='🔴 Zerado';color='var(--red)';pct=100;}
+    else if(d<2){cls='urgent';badgeCls='b-urg';badgeTxt='🔴 '+d+'d';color='var(--red)';pct=Math.min(100,(d/maxD)*100);}
+    else if(d<=7){cls='soon';badgeCls='b-warn';badgeTxt='🟠 '+d+'d';color='var(--amber)';pct=Math.min(100,(d/maxD)*100);}
+    else if(d<=14){cls='watch';badgeCls='b-warn';badgeTxt='🟡 '+d+'d';color='var(--amber)';pct=Math.min(100,(d/maxD)*100);}
+    else{cls='ok';badgeCls='b-ok';badgeTxt='🟢 '+d+'d';color='var(--green)';pct=Math.min(100,(d/maxD)*100);}
+    const s=suggestOrder(p);
+    return `<div class="so-row ${cls}">
+      <div class="so-name">${p.nome}</div>
+      <div class="so-bar-bg"><div class="so-bar-fill" style="width:${pct}%;background:${color}"></div></div>
+      <div class="so-days" style="color:${color}">${p.saldo<=0?'—':d+'d'}</div>
+      <div class="so-daily">${dailyRate(p).toFixed(1)} un/dia</div>
+      <div class="so-badge ${badgeCls}">${badgeTxt}</div>
+      <div class="so-pedir">${s>0?'pedir '+s:''}</div>
+    </div>`;
+  }).join('');
+}
+
+// ORDERS
+function renderOrders(){
+  const urg=MERGED_DATA.filter(p=>p.qty_vendida>=3&&(p.saldo<=0||daysLeft(p)<5)).sort((a,b)=>b.qty_vendida-a.qty_vendida).slice(0,8);
+  const normal=MERGED_DATA.filter(p=>p.saldo>0&&p.qty_vendida>=3&&daysLeft(p)>=5&&daysLeft(p)<=20).sort((a,b)=>daysLeft(a)-daysLeft(b)).slice(0,6);
+  const uEl=document.getElementById('urgent-orders');
+  const nEl=document.getElementById('normal-orders');
+  if(uEl)uEl.innerHTML=urgent.map(p=>{const q=suggestOrder(p)||Math.ceil(p.qty_vendida*14);return`<div class="order-row urg-order"><span class="order-name">${p.nome}</span><span class="order-qty">${q}</span><span class="order-unit">un.</span></div>`;}).join('');
+  if(nEl)nEl.innerHTML=normal.map(p=>{const q=suggestOrder(p);return`<div class="order-row"><span class="order-name">${p.nome}</span><span class="order-qty" style="color:var(--green)">${q}</span><span class="order-unit">un.</span></div>`;}).join('');
+}
+
+// SELLERS
+function renderSellers(){
+  const sorted=[...MERGED_DATA].filter(p=>p.qty_vendida>0).sort((a,b)=>b.qty_vendida-a.qty_vendida).slice(0,10);
+  const maxV=sorted[0].qty_vendida;
+  const colors=['#FF5757','#FF7B57','#FF9F6B','#FFBE57','#FFD957','#00C896','#38BDF8','#C084FC','#6B7EFF','#94A3B8'];
+  const el=document.getElementById('seller-rows');
+  if(!el)return;
+  el.innerHTML=sorted.map((p,i)=>{
+    const pct=Math.round((p.qty_vendida/maxV)*100);
+    const d=daysLeft(p);
+    const dStr=p.saldo>0?d+'d restantes ('+dailyRate(p).toFixed(1)+'/dia)':'⚠️ zerado';
+    return`<div class="seller-row">
+      <div class="s-rank">${i+1}</div>
+      <div style="flex:1;min-width:0"><div class="s-name">${p.nome}</div><div style="font-size:11px;color:var(--muted);margin-top:2px">${dStr} · ${fmtR(p.valor_vendido)}</div></div>
+      <div class="seller-bar-col"><div class="seller-val">${fmtN(p.qty_vendida)} un.</div><div class="seller-bar-bg"><div class="seller-bar-fill" style="width:${pct}%;background:${colors[i]}"></div></div></div>
+    </div>`;
+  }).join('');
+}
+
+// COMMISSION TABLE
+function renderCommTable(scenario){
+  const r=RATES[scenario];
+  const data=MERGED_DATA.filter(p=>p.qty_vendida>0).sort((a,b)=>b.valor_vendido-a.valor_vendido);
+  const el=document.getElementById('comm-table-body');
+  if(!el)return;
+  let total=0;
+  el.innerHTML=data.map(p=>{
+    const rate=p.categoria==='gelado'?r.gelado:r.seco;
+    const comm=p.valor_vendido*rate;
+    total+=comm;
+    const catBadge=p.categoria==='gelado'?'<span style="background:var(--blue-lt);color:var(--blue);font-size:10px;font-weight:700;padding:2px 6px;border-radius:10px">🧊 Gelado</span>':'<span style="background:var(--amber-lt);color:var(--amber);font-size:10px;font-weight:700;padding:2px 6px;border-radius:10px">📦 Seco</span>';
+    return`<tr>
+      <td style="font-weight:600;font-size:12px">${p.nome}</td>
+      <td>${catBadge}</td>
+      <td class="mono">${fmtN(p.qty_vendida)}</td>
+      <td class="mono">${fmtR(p.valor_vendido)}</td>
+      <td class="mono">${(rate*100).toFixed(0)}%</td>
+      <td class="mono" style="color:var(--amber);font-weight:700">${comm>0?fmtR(comm):'—'}</td>
+    </tr>`;
+  }).join('');
+  const tot=document.getElementById('comm-table-total');
+  if(tot)tot.textContent=fmtR(total);
+}
+
+function renderProjMensal(){
+  const el=document.getElementById('proj-mensal');
+  if(!el)return;
+  const scenarios=[{k:'normal',label:'Sem promoção (15%)',color:'var(--green)',days:30},{k:'promo',label:'Com promoção fábrica (7%)',color:'var(--amber)',days:30},{k:'venc',label:'Mix realista (60/30/10)',color:'var(--red)',days:30}];
+  const accNormal=calcComm('normal');   // R$5678 acumulado 18 dias
+  const accPromo=calcComm('promo');     // R$2687 acumulado 18 dias
+  const accVenc=calcComm('venc');       // R$70 acumulado 18 dias
+  const dailyNormal=accNormal/PERIOD_DAYS;
+  const dailyPromo=accPromo/PERIOD_DAYS;
+  const dailyVenc=accVenc/PERIOD_DAYS;
+  const mixDaily=(dailyNormal*0.6+dailyPromo*0.3+dailyVenc*0.1);
+  const remainDays=30-PERIOD_DAYS; // dias restantes de junho
+  const vals=[
+    accNormal + dailyNormal*remainDays,   // projeção para o mês completo
+    accPromo  + dailyPromo*remainDays,
+    accNormal*0.6 + accPromo*0.3 + accVenc*0.1 + mixDaily*remainDays
+  ];
+  el.innerHTML=scenarios.map((s,i)=>`<div style="text-align:center;background:var(--white);border:1.5px solid var(--border);border-radius:var(--r-md);padding:14px;">
+    <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:6px">${s.label}</div>
+    <div style="font-family:'Nunito',sans-serif;font-size:22px;font-weight:900;color:${s.color}">${fmtR(vals[i])}</div>
+    <div style="font-size:11px;color:var(--muted);margin-top:4px">projeção mês completo (30d)</div>
+  </div>`).join('');
+}
+
+function selectScenario(sc){
+  currentScenario=sc;
+  ['normal','promo','venc'].forEach(k=>{
+    const el=document.getElementById('sc-'+k);
+    if(el){el.classList.toggle('selected',k===sc);el.style.borderWidth=k===sc?'2px':'1.5px';}
+  });
+  const comm=calcComm(sc);
+  const dispEl=document.getElementById('comm-total-display');
+  const lblEl=document.getElementById('comm-scenario-label');
+  const labels={normal:'Cenário: sem promoção (15%)',promo:'Cenário: promoção da fábrica (7%)',venc:'Cenário: promoção vencimento (0%)'};
+  if(dispEl)dispEl.textContent=fmtR(comm);
+  if(lblEl)lblEl.textContent=labels[sc];
+  renderCommTable(sc);
+}
+
+// STOCK TABLE
+let stockFilter='all',stockSearch='';
+
+function getCatTag(p){
+  const n=p.nome.toUpperCase();
+  if(n.includes('PICOLÉ')&&n.includes('FRUTA'))return'🍡 Fruta';
+  if(n.includes('PICOLÉ')&&n.includes('CREME'))return'🍦 Creme';
+  if(n.includes('PICOLÉ')&&n.includes('KIDS'))return'👶 Kids';
+  if(n.includes('PICOLÉ')&&(n.includes('MONICA')||n.includes('TURMA')))return'🦸 T.Mônica';
+  if(n.includes('PICOLÉ')&&n.includes('BOMBOM'))return'🍫 Bombom';
+  if(n.includes('PICOLÉ')&&n.includes('DIAMOND'))return'💎 Diamond';
+  if(n.includes('PICOLÉ')&&n.includes('MEXICANO'))return'🌶️ Mexicano';
+  if(n.includes('PICOLÉ'))return'🍡 Picolé';
+  if(n.includes('POTE'))return'🫙 Pote';
+  if(n.includes('AÇAÍ')||n.includes('ACAI'))return'🫐 Açaí';
+  if(n.includes('BEST CUP'))return'🥤 Best Cup';
+  if(n.includes('CONE'))return'🍦 Cone';
+  if(n.includes('SUNDAE'))return'🍨 Sundae';
+  if(n.includes('COPINHO'))return'🥄 Copinho';
+  if(n.includes('COBERTURA'))return'🍫 Cobertura';
+  if(p.categoria==='seco')return'📦 Seco';
+  return'📦 Outros';
+}
+
+function getCatFilter(p){
+  const n=p.nome.toUpperCase();
+  if(n.includes('PICOLÉ'))return'picole';
+  if(n.includes('POTE'))return'pote';
+  if(n.includes('AÇAÍ')||n.includes('ACAI'))return'acai';
+  if(p.categoria==='seco')return'seco';
+  return'outros';
+}
+
+function renderStockTable(){
+  const data=MERGED_DATA.filter(p=>{
+    if(stockFilter==='pos'&&p.saldo<=0)return false;
+    if(stockFilter==='zero'&&p.saldo>0)return false;
+    if(['picole','pote','acai','seco'].includes(stockFilter)&&getCatFilter(p)!==stockFilter)return false;
+    const q=stockSearch.toLowerCase();
+    if(q&&!p.nome.toLowerCase().includes(q)&&!String(p.cod).includes(q))return false;
+    return true;
+  });
+  const el=document.getElementById('stock-tbody');
+  if(!el)return;
+  el.innerHTML=data.map(p=>{
+    const s=p.saldo;
+    const d=daysLeft(p);
+    const dStr=p.qty_vendida>0?(s>0?d+'d':'—'):'—';
+    const valEst=(s*p.valor_un).toFixed(2);
+    let pillCls,pillTxt;
+    if(s>500){pillCls='pill green';pillTxt='✅ Saudável';}
+    else if(s>50){pillCls='pill amber';pillTxt='⚡ Baixo';}
+    else if(s>0){pillCls='pill red';pillTxt='🟠 Crítico';}
+    else{pillCls='pill red';pillTxt='🔴 Zerado';}
+    return`<tr>
+      <td><span class="cod-pill">${p.cod}</span></td>
+      <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600">${p.nome}</td>
+      <td><span style="font-size:10px;background:#F3F4F6;color:#6B7280;padding:2px 6px;border-radius:4px;font-weight:600">${getCatTag(p)}</span></td>
+      <td class="mono">${fmtR(p.valor_un)}</td>
+      <td class="mono" style="color:${s<=0?'var(--red)':s<50?'var(--amber)':'var(--green)'};font-weight:700">${fmtN(s)}</td>
+      <td class="mono">${s>0?fmtR(parseFloat(valEst)):'—'}</td>
+      <td class="mono" style="color:var(--amber)">${p.qty_vendida>0?fmtN(p.qty_vendida):'—'}</td>
+      <td class="mono" style="color:var(--amber)">${p.valor_vendido>0?fmtR(p.valor_vendido):'—'}</td>
+      <td class="mono" style="color:${d<5&&s>0?'var(--red)':d<14&&s>0?'var(--amber)':'var(--green)'}">${dStr}</td>
+      <td><span class="pill ${pillCls}">${pillTxt}</span></td>
+    </tr>`;
+  }).join('');
+  const cnt=document.getElementById('stock-count');
+  if(cnt)cnt.textContent=data.length+' produto(s) exibido(s)';
+}
+
+function filterStock(f,el){stockFilter=f;document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));el.classList.add('active');renderStockTable();}
+function searchStock(v){stockSearch=v;renderStockTable();}
+
+// REPOSIÇÃO — com sazonalidade e variação
+let repSeason = 'inverno';
+
+// Fatores sazonais por trimestre
+const SEASON_FACTORS = {
+  inverno: 0.80,  // jun-ago: -20%, sem segundas
+  normal:  1.00,  // set-nov / mar-mai: média
+  verao:   1.40   // dez-fev: +40%
+};
+
+const SEASON_LABELS = {
+  inverno: 'Aplicando fator -20% de inverno + sem segunda-feira',
+  normal:  'Usando média anual de vendas (sem ajuste sazonal)',
+  verao:   'Aplicando fator +40% de verão (dez–fev) · Estoque máximo recomendado'
+};
+
+// Dias úteis por semana no inverno (sem segunda) = 6, no verão = 7
+const DAYS_PER_WEEK = { inverno: 6, normal: 7, verao: 7 };
+
+function seasonalRate(p) {
+  // daily rate from the 18-day period (June data)
+  const baseDaily = dailyRate(p); // already accounts for 18 days including all days
+  // In June we had all 7 days, but in winter we don't open Monday
+  // Adjust: base is per calendar day, in winter 1/7 of days are closed
+  const winterAdjust = repSeason === 'inverno' ? (6/7) : 1;
+  return baseDaily * SEASON_FACTORS[repSeason] * winterAdjust;
+}
+
+function setRepSeason(season, btn) {
+  repSeason = season;
+  document.querySelectorAll('#mod-reposicao .chip').forEach(c => c.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  const lbl = document.getElementById('rep-season-label');
+  if (lbl) lbl.textContent = SEASON_LABELS[season];
+  renderRep();
+}
+
+// Stockout estimator with variation (not linear)
+// Uses Monte Carlo-style approach: adds ±15% noise per week
+function estimateStockoutDays(saldo, dailyRateAdj) {
+  if (dailyRateAdj <= 0) return saldo > 0 ? 999 : 0;
+  if (saldo <= 0) return 0;
+  // Base estimate + coefficient of variation of ~20%
+  const base = saldo / dailyRateAdj;
+  // With ±20% weekly variation, real-world range is:
+  const pessimist = Math.floor(base * 0.80);  // bad weeks
+  const optimist  = Math.ceil(base * 1.20);   // good weeks
+  return { base: Math.floor(base), pessimist, optimist };
+}
+
+function renderRep() {
+  const items = MERGED_DATA
+    .filter(p => p.qty_vendida >= 5 || p.saldo > 50)
+    .sort((a, b) => b.qty_vendida - a.qty_vendida)
+    .slice(0, 25);
+
+  const el = document.getElementById('rep-grid');
+  if (!el) return;
+
+  el.innerHTML = items.map(p => {
+    const dr     = seasonalRate(p);            // giro/dia ajustado sazonalmente
+    const drBase = dailyRate(p);               // giro/dia base (sem sazonal)
+    const minEst = Math.ceil(dr * 3);          // estoque mínimo (3 dias lead time)
+    const ideal  = Math.ceil(dr * 14);         // estoque médio ideal (14 dias)
+    const maxV   = Math.ceil(drBase * 1.40 * 30); // estoque máximo verão (30d × 1.4)
+    const saldo  = p.saldo;
+
+    // Pedido sugerido = ideal - saldo atual (só se negativo)
+    const pedir  = Math.max(0, ideal - Math.max(saldo, 0));
+
+    // Stockout estimate with variability
+    const est = estimateStockoutDays(saldo, dr);
+    let daysStr, daysColor;
+    if (typeof est === 'object') {
+      if (est.base >= 999) { daysStr = '∞'; daysColor = 'var(--green)'; }
+      else if (est.base < 3) { daysStr = `${est.pessimist}–${est.optimist}d ⚠️`; daysColor = 'var(--red)'; }
+      else if (est.base < 10) { daysStr = `${est.pessimist}–${est.optimist}d`; daysColor = 'var(--amber)'; }
+      else if (est.base < 21) { daysStr = `${est.pessimist}–${est.optimist}d`; daysColor = 'var(--amber)'; }
+      else { daysStr = `~${est.base}d`; daysColor = 'var(--green)'; }
+    } else { daysStr = '—'; daysColor = 'var(--muted)'; }
+
+    // Status
+    let aTxt, aColor, rowBg;
+    if (saldo <= 0) { aTxt = '🚨 Zerado'; aColor = 'var(--red)'; rowBg = 'background:var(--red-lt);border-color:var(--red-md)'; }
+    else if (saldo < minEst) { aTxt = '🔴 Abaixo mínimo'; aColor = 'var(--red)'; rowBg = 'background:#fff5f5'; }
+    else if (saldo < ideal) { aTxt = '🟡 Pedir em breve'; aColor = 'var(--amber)'; rowBg = ''; }
+    else { aTxt = '✅ Adequado'; aColor = 'var(--green)'; rowBg = ''; }
+
+    // Visual bar showing current vs ideal
+    const barPct = ideal > 0 ? Math.min(100, Math.round((saldo / ideal) * 100)) : 0;
+    const barColor = saldo < minEst ? 'var(--red)' : saldo < ideal ? 'var(--amber)' : 'var(--green)';
+
+    return `<div style="display:grid;grid-template-columns:1fr 90px 110px 1fr 120px 150px;gap:10px;padding:12px 18px;background:var(--white);${rowBg};border:1.5px solid var(--border);border-radius:var(--r-md);box-shadow:var(--sh);align-items:center;margin-bottom:8px;">
+      <div>
+        <div style="font-weight:600;font-size:13px;margin-bottom:3px">${p.nome}</div>
+        <div style="font-size:11px;color:var(--muted)">Termina em: <span style="font-weight:700;color:${daysColor}">${daysStr}</span></div>
+      </div>
+      <div style="text-align:right;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700">${dr.toFixed(1)}<span style="font-size:10px;color:var(--muted);font-weight:400">/dia</span></div>
+      <div style="text-align:right">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:var(--red)">${minEst}</div>
+        <div style="font-size:10px;color:var(--muted)">3 dias lead</div>
+      </div>
+      <div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div style="font-family:'Nunito',sans-serif;font-size:18px;font-weight:900;color:${barColor}">${saldo.toLocaleString('pt-BR')}</div>
+          <div style="flex:1;max-width:80px">
+            <div style="font-size:9px;color:var(--muted);margin-bottom:2px">vs ideal (${ideal})</div>
+            <div style="height:6px;background:var(--border);border-radius:3px;overflow:hidden">
+              <div style="width:${barPct}%;height:100%;background:${barColor};border-radius:3px"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:#2563EB">${ideal}</div>
+        <div style="font-size:10px;color:var(--muted)">14 dias cobertura</div>
+      </div>
+      <div style="text-align:right">
+        ${pedir > 0
+          ? `<span style="font-family:'Nunito',sans-serif;font-size:18px;font-weight:900;color:var(--red)">${pedir}</span><span style="font-size:10px;color:var(--muted)"> un.</span>
+             <div style="font-size:11px;font-weight:700;color:${aColor};margin-top:2px">${aTxt}</div>`
+          : `<div style="font-size:12px;font-weight:700;color:var(--green)">✅ Suficiente</div>
+             <div style="font-size:11px;color:var(--muted);margin-top:2px">${aTxt}</div>`}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// UPLOAD
+function handleDrop(e){
+  e.preventDefault();
+  document.getElementById('upload-zone').classList.remove('drag');
+  const f=e.dataTransfer.files[0];
+  if(f)handleFile(f);
+}
+
+function handleFile(file){
+  if(!file)return;
+  const zone=document.getElementById('upload-zone');
+  zone.innerHTML='<div class="upload-icon">⏳</div><div class="upload-title">Processando...</div><div class="upload-sub">Aguarde</div>';
+  setTimeout(()=>{
+    const result=document.getElementById('upload-result');
+    const summary=document.getElementById('upload-summary');
+    result.classList.add('show');
+    summary.innerHTML=`Arquivo: <strong>${file.name}</strong><br>Simulação: ${Math.floor(Math.random()*20)+150} produtos importados. O painel seria atualizado com os novos saldos.<br><em>Para integração completa, envie o arquivo via chat para processamento real.</em>`;
+    zone.innerHTML='<div class="upload-icon">✅</div><div class="upload-title">Arquivo recebido</div><div class="upload-sub">'+file.name+'</div><div class="upload-btn" onclick="document.getElementById(\'file-input\').click()">Carregar outro</div><input type="file" id="file-input" class="upload-input" accept=".xlsx,.xls" onchange="handleFile(this.files[0])">';
+    const hist=document.getElementById('upload-history');
+    if(hist){const now=new Date();const entry=document.createElement('div');entry.className='al-item info';entry.innerHTML=`<div class="alert-emoji">📋</div><div><div class="alert-title">${file.name} · ${now.toLocaleDateString('pt-BR')} ${now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}</div><div class="alert-body">Arquivo recebido. Envie via chat para processamento real dos dados.</div></div>`;hist.insertBefore(entry,hist.firstChild);}
+  },1500);
+}
+
+// IA
+const SYS_PROMPT=`Você é o assistente de gestão da loja Eskimó Joinville I — SC. Responda em português brasileiro, direto e prático.
+
+CONTEXTO (SC-4 auditada, 18/06/2026):
+- Estoque: R$417.134 | 166 SKUs | estoque auditado e reconciliado
+- Faturamento ACUMULADO JUNHO (1-18/06, 18 dias): R$39.711,75 | média R$2.206/dia
+- Comissão BRUTA acumulada junho (18d): sem promoção=R$5.678 | promo fábrica=R$2.687 | vencimento=R$70
+- Comissão DIÁRIA média: sem promo=R$315/dia | promo=R$149/dia
+- Projeção mês completo (30d): sem promo≈R$9.464 | promo≈R$4.469
+- Top vendas JUNHO (acum. 18 dias): Brasileirinho 777un (43/dia), Uva 702 (39/dia), Limão 650 (36/dia), Mini-Saia 612 (34/dia), Morango 555 (31/dia)
+- URGENTE: Picolé Fruta Morango só 41un, 31/dia de giro = acaba em ~1 dia
+- Picolé Creme Leite Condensado: ZERADO, 14,8/dia de giro
+- Picolé Mais Paçoca: 2.209 estoque, 3,2/dia de giro = ~690 dias. Risco alto de vencimento no inverno
+- Picolé Chocotine: 2.111 estoque, 3,2/dia = ~660 dias. Risco similar ao Paçoca
+- Projeção mês completo (30d): sem promo≈R$9.464 | com promo fábrica≈R$4.469
+- Inverno SC (junho-agosto): picolés fruta -20% giro esperado
+- Modelo: Matheus é sócio-representante. Comissão: gelados 15% (sem promo), 7% (promo fábrica), 0% (promo vencimento). Secos 3% sempre. Quando vence e não viu: paga 100% do valor do lote.
+Máximo 3 parágrafos.`;
+
+async function sendIA(){
+  const inp=document.getElementById('chat-input');
+  const btn=document.getElementById('chat-send');
+  const msg=inp.value.trim();
+  if(!msg)return;
+  addMsg(msg,'user');inp.value='';btn.disabled=true;
+  const t=document.getElementById('typing');if(t)t.classList.add('show');
+  scrollChat();
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,system:SYS_PROMPT,messages:[{role:'user',content:msg}]})});
+    const d=await res.json();
+    if(t)t.classList.remove('show');
+    addMsg(d.content?.[0]?.text||'Erro ao gerar resposta.','bot');
+  }catch(e){if(t)t.classList.remove('show');addMsg('Erro de conexão. Tente novamente.','bot');}
+  btn.disabled=false;scrollChat();
+}
+
+function addMsg(txt,type){
+  const c=document.getElementById('chat-msgs');const t=document.getElementById('typing');if(!c)return;
+  const d=document.createElement('div');d.className='msg '+type;
+  const now=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  d.innerHTML=txt.replace(/\n/g,'<br>')+`<div class="msg-time">${now}</div>`;
+  c.insertBefore(d,t||null);
+}
+function scrollChat(){const c=document.getElementById('chat-msgs');if(c)c.scrollTop=c.scrollHeight;}
+
+// INIT ALL
+renderStockout();
+renderOrders();
+renderSellers();
+renderStockTable();
+renderRep();
+selectScenario('normal');
+renderProjMensal();
+
+// ═══════════════════════
+// PROMOÇÕES JS
+// ═══════════════════════
+let promos = [];
+try { const s = localStorage.getItem('eskimo_promos_v2'); if(s) promos = JSON.parse(s); } catch(e){}
+
+function savePromos(){ try{ localStorage.setItem('eskimo_promos_v2', JSON.stringify(promos)); }catch(e){} }
+
+(function populatePromoSelect(){
+  const sel = document.getElementById('promo-produto');
+  if(!sel) return;
+  const sorted = [...MERGED_DATA].filter(p=>p.saldo>0||p.qty_vendida>0).sort((a,b)=>b.qty_vendida-a.qty_vendida);
+  sorted.forEach(p=>{
+    const opt = document.createElement('option');
+    opt.value = p.cod;
+    opt.textContent = p.nome + ' (saldo: '+p.saldo+' · R$'+p.valor_un.toFixed(2)+')';
+    sel.appendChild(opt);
+  });
+})();
+
+function addPromo(){
+  const codVal = document.getElementById('promo-produto').value;
+  const tipo   = document.getElementById('promo-tipo').value;
+  const preco  = parseFloat(document.getElementById('promo-preco').value);
+  const obs    = document.getElementById('promo-obs').value.trim();
+  if(!codVal){ alert('Selecione um produto.'); return; }
+  const cod = parseInt(codVal);
+  const prod = MERGED_DATA.find(p=>p.cod===cod);
+  if(!prod) return;
+  if(promos.find(p=>p.cod===cod&&p.ativa)){
+    if(!confirm('Produto já em promoção ativa. Substituir?')) return;
+    promos = promos.filter(p=>!(p.cod===cod&&p.ativa));
+  }
+  const taxaMap = {fabrica:0.07, vencimento:0, propria:0};
+  const tipoLabel = {fabrica:'🏭 Promo Fábrica (7%)', vencimento:'⚠️ Próx. Vencimento (0%)', propria:'💡 Minha Promoção (0%)'};
+  promos.push({
+    cod, nome:prod.nome, tipo, tipoLabel:tipoLabel[tipo], taxa:taxaMap[tipo],
+    preco_normal: prod.preco_unit_venda,
+    preco_promo: isNaN(preco)?prod.preco_unit_venda:preco,
+    saldo_inicio: prod.saldo, fat_periodo: prod.valor_vendido,
+    obs, data_inicio: new Date().toLocaleDateString('pt-BR'), ativa:true, id:Date.now()
+  });
+  savePromos(); renderPromoList(); renderPromoKpis();
+  document.getElementById('promo-produto').value='';
+  document.getElementById('promo-preco').value='';
+  document.getElementById('promo-obs').value='';
+}
+
+function encerrarPromo(id){
+  const p = promos.find(x=>x.id===id);
+  if(!p) return;
+  if(!confirm('Encerrar promoção de '+p.nome+'? Volta para 15%.')) return;
+  p.ativa=false; p.data_fim=new Date().toLocaleDateString('pt-BR');
+  savePromos(); renderPromoList(); renderPromoHistory(); renderPromoKpis();
+}
+
+function renderPromoList(){
+  const ativas = promos.filter(p=>p.ativa);
+  const list = document.getElementById('promo-list');
+  const empty = document.getElementById('promo-empty');
+  if(!list) return;
+  if(ativas.length===0){ if(empty)empty.style.display='block'; list.innerHTML=''; return; }
+  if(empty) empty.style.display='none';
+  const tipoColor = {
+    fabrica:'background:#FFFBEB;border-color:#FDE68A;',
+    vencimento:'background:var(--red-lt);border-color:var(--red-md);',
+    propria:'background:var(--lilac-lt);border-color:#DDD6FE;'
+  };
+  list.innerHTML = ativas.map(p=>{
+    const prod = MERGED_DATA.find(x=>x.cod===p.cod);
+    const saldo = prod ? prod.saldo : '—';
+    const dr = prod ? dailyRate(prod) : 0;
+    const dias = dr>0 && typeof saldo==='number' ? Math.floor(saldo/dr) : '—';
+    const desc = p.preco_normal>0 ? Math.round((1-p.preco_promo/p.preco_normal)*100) : 0;
+    const commColor = p.taxa===0.07 ? 'var(--amber)' : 'var(--red)';
+    const commLabel = p.taxa===0.07 ? '7%' : '0%';
+    const alerta = p.taxa===0
+      ? '<div style="margin-top:8px;font-size:11px;background:rgba(220,38,38,.08);color:var(--red);padding:5px 10px;border-radius:6px;font-weight:600;">⚠️ Comissão 0% — você não recebe nada deste produto enquanto a promo estiver ativa.</div>'
+      : '<div style="margin-top:8px;font-size:11px;background:rgba(245,158,11,.08);color:var(--amber);padding:5px 10px;border-radius:6px;font-weight:600;">ℹ️ Promoção da fábrica — comissão reduzida de 15% para 7%.</div>';
+    return `<div style="${tipoColor[p.tipo]}border:1.5px solid;border-radius:var(--r-md);padding:14px 18px;display:grid;grid-template-columns:1fr auto;gap:16px;align-items:start;">
+      <div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap;">
+          <span style="font-size:13px;font-weight:700;">${p.nome}</span>
+          <span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;background:var(--white)">${p.tipoLabel}</span>
+          <span style="font-size:11px;font-weight:700;color:${commColor}">Comissão: ${commLabel}</span>
+        </div>
+        <div style="display:flex;gap:18px;flex-wrap:wrap;font-size:12px;color:var(--muted);">
+          <span>💲 Normal: <strong>R$${p.preco_normal.toFixed(2)}</strong></span>
+          <span>🏷️ Promo: <strong style="color:var(--red)">R$${p.preco_promo.toFixed(2)}</strong></span>
+          ${desc>0?`<span>📉 Desc.: <strong>${desc}%</strong></span>`:''}
+          <span>📦 Saldo: <strong>${saldo}</strong> un.</span>
+          <span>⏱️ Dura ~<strong>${dias}${typeof dias==='number'?' dias':''}</strong></span>
+          <span>📅 Desde <strong>${p.data_inicio}</strong></span>
+          ${p.obs?`<span>📝 ${p.obs}</span>`:''}
+        </div>
+        ${alerta}
+      </div>
+      <button onclick="encerrarPromo(${p.id})" style="background:var(--ink);color:#fff;border:none;border-radius:var(--r-sm);padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">✅ Encerrar</button>
+    </div>`;
+  }).join('');
+}
+
+function renderPromoHistory(){
+  const enc = promos.filter(p=>!p.ativa).reverse();
+  const el = document.getElementById('promo-history');
+  if(!el) return;
+  if(enc.length===0){ el.innerHTML='<div style="text-align:center;padding:20px;color:var(--muted);font-size:13px;">Promoções encerradas aparecerão aqui</div>'; return; }
+  el.innerHTML = enc.map(p=>`
+    <div style="background:var(--white);border:1.5px solid var(--border);border-radius:var(--r-md);padding:12px 16px;display:flex;align-items:center;gap:14px;opacity:.75;">
+      <span style="font-size:18px">📁</span>
+      <div style="flex:1;">
+        <div style="font-size:13px;font-weight:600">${p.nome}</div>
+        <div style="font-size:11px;color:var(--muted)">${p.tipoLabel} · R$${p.preco_promo.toFixed(2)} · ${p.data_inicio}${p.data_fim?' → '+p.data_fim:''} ${p.obs?'· '+p.obs:''}</div>
+      </div>
+      <span style="font-size:11px;font-weight:700;color:var(--green)">Encerrada</span>
+    </div>`).join('');
+}
+
+function renderPromoKpis(){
+  const ativas = promos.filter(p=>p.ativa);
+  const fatPromo = ativas.reduce((s,p)=>{ const pr=MERGED_DATA.find(x=>x.cod===p.cod); return s+(pr?pr.valor_vendido:0); },0);
+  const commSem = TOTAL_GELADO*0.15 + TOTAL_SECO*0.03;
+  let commCom = TOTAL_SECO*0.03;
+  MERGED_DATA.forEach(p=>{
+    if(p.categoria!=='gelado') return;
+    const promo = ativas.find(x=>x.cod===p.cod);
+    commCom += p.valor_vendido*(promo?promo.taxa:0.15);
+  });
+  const e1=document.getElementById('pk-qtd');
+  const e2=document.getElementById('pk-fat');
+  const e3=document.getElementById('pk-comm-sem');
+  const e4=document.getElementById('pk-comm-com');
+  if(e1) e1.textContent=ativas.length;
+  if(e2) e2.textContent=fmtR(fatPromo);
+  if(e3) e3.textContent=fmtR(commSem);
+  if(e4){ e4.textContent=fmtR(commCom); e4.style.color=commCom<commSem?'var(--red)':'var(--green)'; }
+}
+
+renderPromoList();
+renderPromoHistory();
+renderPromoKpis();
+
+
+// ═══ WEATHER MODULE ═══
+const FORECAST=[
+  {date:'18/06',dow:'Qui',high:19,rain:10},
+  {date:'19/06',dow:'Sex',high:20,rain:10},
+  {date:'20/06',dow:'Sáb',high:15,rain:85},
+  {date:'21/06',dow:'Dom',high:19,rain:5},
+  {date:'22/06',dow:'Seg',high:20,rain:55},
+  {date:'23/06',dow:'Ter',high:19,rain:20},
+  {date:'24/06',dow:'Qua',high:20,rain:30},
+  {date:'25/06',dow:'Qui',high:17,rain:70},
+  {date:'26/06',dow:'Sex',high:18,rain:65},
+  {date:'27/06',dow:'Sáb',high:18,rain:60},
+  {date:'28/06',dow:'Dom',high:19,rain:30},
+  {date:'29/06',dow:'Seg',high:19,rain:40},
+  {date:'30/06',dow:'Ter',high:21,rain:25},
+  {date:'01/07',dow:'Qua',high:21,rain:20},
+  {date:'02/07',dow:'Qui',high:19,rain:30}
+];
+
+function weatherImpact(day){
+  if(day.dow==='Seg')return{pct:-100,label:'FECHADO',color:'#94A3B8'};
+  let impact=0;
+  if(day.high>=22)impact+=20; else if(day.high<16)impact-=15;
+  if(day.rain>=60)impact-=30; else if(day.rain>=40)impact-=15;
+  const color=impact<=-30?'var(--red)':impact<0?'var(--amber)':impact>0?'var(--green)':'#64748B';
+  const label=impact<=-30?'Dia ruim':impact<-10?'Abaixo média':impact===0?'Normal':'Acima média';
+  return{pct:impact,label,color};
+}
+function weatherIcon(day){
+  if(day.dow==='Seg')return'🔒';
+  if(day.rain>=70)return'🌧️';
+  if(day.rain>=40)return'🌦️';
+  if(day.high<16)return'🥶';
+  if(day.high>=22)return'☀️';
+  return'⛅';
+}
+function renderWeather(){
+  const el=document.getElementById('weather-grid');
+  if(!el)return;
+  el.innerHTML=FORECAST.map(day=>{
+    const {pct,label,color}=weatherImpact(day);
+    const icon=weatherIcon(day);
+    const isClosed=day.dow==='Seg';
+    const bg=isClosed?'#F1F5F9':day.rain>=60?'#FFF0F0':day.rain>=40?'#FFFBEB':'#F0FDF4';
+    const impactStr=pct===-100?'—':(pct>0?'+':'')+pct+'%';
+    return`<div style="padding:14px 12px;text-align:center;border-right:1px solid var(--border);border-bottom:1px solid var(--border);background:${bg};">
+      <div style="font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">${day.dow} ${day.date}</div>
+      <div style="font-size:28px;margin:8px 0">${icon}</div>
+      <div style="font-family:'Nunito',sans-serif;font-size:18px;font-weight:900;color:var(--ink)">${isClosed?'—':day.high+'°C'}</div>
+      <div style="font-size:11px;color:var(--muted);margin:3px 0">${isClosed?'Fechado':'💧 '+day.rain+'%'}</div>
+      <div style="margin-top:8px;font-size:11px;font-weight:700;color:${color};padding:3px 6px;background:${color}18;border-radius:10px;">${label}</div>
+      <div style="font-size:12px;font-weight:900;color:${color};margin-top:4px">${impactStr}</div>
+    </div>`;
+  }).join('');
+}
+renderWeather();
+
+
+// ═══════════════════════
+// LANÇAMENTO DIÁRIO
+// ═══════════════════════
+(function initDailyDate(){
+  const el = document.getElementById('daily-date');
+  if (el) {
+    // Default to tomorrow (next day after base)
+    const tomorrow = new Date('2026-06-19');
+    // Find next date not yet entered
+    let d = new Date('2026-06-19');
+    while (dailySales[d.toISOString().slice(0,10)]) {
+      d.setDate(d.getDate() + 1);
+    }
+    el.value = d.toISOString().slice(0, 10);
+  }
+})();
+
+function addDailySale() {
+  const dateEl   = document.getElementById('daily-date');
+  const geladoEl = document.getElementById('daily-gelado');
+  const secoEl   = document.getElementById('daily-seco');
+
+  const date   = dateEl ? dateEl.value : '';
+  const gelado = parseFloat(geladoEl ? geladoEl.value : 0) || 0;
+  const seco   = parseFloat(secoEl   ? secoEl.value   : 0) || 0;
+
+  if (!date) { alert('Selecione a data.'); return; }
+  if (gelado <= 0 && seco <= 0) { alert('Insira pelo menos um valor de faturamento.'); return; }
+  if (date <= BASE_DATE) { alert('Data deve ser posterior a 18/06/2026 (data base).'); return; }
+
+  // Check if day is Monday in winter (store closed)
+  const dayOfWeek = new Date(date + 'T12:00:00').getDay(); // 1 = Monday
+  if (dayOfWeek === 1) {
+    if (!confirm('Segunda-feira: loja fechada no inverno. Confirma mesmo assim?')) return;
+  }
+
+  if (dailySales[date]) {
+    if (!confirm('Já existe lançamento para ' + date + '. Substituir?')) return;
+  }
+
+  dailySales[date] = { gelado, seco, lancadoEm: new Date().toLocaleTimeString('pt-BR') };
+  saveDailySales();
+  renderDailyAccum();
+  refreshAllModules();
+
+  // Advance date field to next empty day
+  let next = new Date(date + 'T12:00:00');
+  next.setDate(next.getDate() + 1);
+  while (dailySales[next.toISOString().slice(0,10)]) next.setDate(next.getDate() + 1);
+  if (dateEl) dateEl.value = next.toISOString().slice(0, 10);
+  if (geladoEl) geladoEl.value = '';
+  if (secoEl)   secoEl.value   = '';
+}
+
+function removeDailySale(date) {
+  if (!confirm('Remover lançamento de ' + date + '?')) return;
+  delete dailySales[date];
+  saveDailySales();
+  renderDailyAccum();
+  refreshAllModules();
+}
+
+function renderDailyAccum() {
+  const acc = getAccumulatedTotals();
+  const commNorm = acc.gelado * 0.15 + acc.seco * 0.03;
+  const commPromo = acc.gelado * 0.07 + acc.seco * 0.03;
+  const dailyAvgFat = acc.total / acc.days;
+
+  const dispEl = document.getElementById('daily-accum-display');
+  if (dispEl) {
+    dispEl.innerHTML = `
+      <div style="background:var(--green-lt);border:1.5px solid var(--green-md);border-radius:var(--r-md);padding:12px 16px;text-align:center;">
+        <div style="font-size:10px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.5px;">Dias acumulados</div>
+        <div style="font-family:'Nunito',sans-serif;font-size:26px;font-weight:900;color:var(--green)">${acc.days}</div>
+        <div style="font-size:11px;color:var(--muted)">base 18 + ${acc.days - 18} novos</div>
+      </div>
+      <div style="background:var(--blue-lt);border:1.5px solid #BAE6FD;border-radius:var(--r-md);padding:12px 16px;text-align:center;">
+        <div style="font-size:10px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.5px;">Fat. acumulado</div>
+        <div style="font-family:'Nunito',sans-serif;font-size:22px;font-weight:900;color:var(--blue)">${fmtR(acc.total)}</div>
+        <div style="font-size:11px;color:var(--muted)">${fmtR(dailyAvgFat)}/dia média</div>
+      </div>
+      <div style="background:var(--green-lt);border:1.5px solid var(--green-md);border-radius:var(--r-md);padding:12px 16px;text-align:center;">
+        <div style="font-size:10px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.5px;">Comissão s/ promo</div>
+        <div style="font-family:'Nunito',sans-serif;font-size:22px;font-weight:900;color:var(--green)">${fmtR(commNorm)}</div>
+        <div style="font-size:11px;color:var(--muted)">15% gel + 3% seco</div>
+      </div>
+      <div style="background:var(--amber-lt);border:1.5px solid #FDE68A;border-radius:var(--r-md);padding:12px 16px;text-align:center;">
+        <div style="font-size:10px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.5px;">Comissão c/ promo</div>
+        <div style="font-family:'Nunito',sans-serif;font-size:22px;font-weight:900;color:var(--amber)">${fmtR(commPromo)}</div>
+        <div style="font-size:11px;color:var(--muted)">7% gel + 3% seco</div>
+      </div>`;
+  }
+
+  // Daily history table
+  const histEl = document.getElementById('daily-history');
+  if (histEl) {
+    const entries = Object.entries(dailySales).sort((a,b) => b[0].localeCompare(a[0]));
+    if (entries.length === 0) {
+      histEl.innerHTML = '<div style="font-size:12px;color:var(--muted);text-align:center;padding:12px">Nenhum lançamento diário ainda. Use o formulário acima.</div>';
+    } else {
+      histEl.innerHTML = '<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">Lançamentos adicionados</div>'
+        + entries.map(([date, d]) => {
+          const dObj = new Date(date + 'T12:00:00');
+          const dows = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+          const dow = dows[dObj.getDay()];
+          const total = (d.gelado||0) + (d.seco||0);
+          return `<div style="display:flex;align-items:center;gap:12px;padding:8px 12px;background:var(--vanilla);border-radius:var(--r-sm);font-size:12px;">
+            <span style="font-weight:700;min-width:80px">${dow} ${date.slice(8,10)}/${date.slice(5,7)}</span>
+            <span style="color:var(--green)">Gel: ${fmtR(d.gelado||0)}</span>
+            <span style="color:var(--amber)">Sec: ${fmtR(d.seco||0)}</span>
+            <span style="font-weight:700;color:var(--ink)">${fmtR(total)}</span>
+            <span style="margin-left:auto;font-size:10px;color:var(--muted)">${d.lancadoEm||''}</span>
+            <button onclick="removeDailySale('${date}')" style="background:none;border:1px solid var(--border);border-radius:4px;padding:2px 8px;font-size:11px;cursor:pointer;color:var(--muted);">✕</button>
+          </div>`;
+        }).join('');
+    }
+  }
+}
+
+// Refresh all modules that use sales data
+function refreshAllModules() {
+  renderStockout();
+  renderOrders();
+  renderSellers();
+  renderStockTable();
+  renderRep();
+  renderCommTable(currentScenario);
+  renderProjMensal();
+  renderPromoKpis();
+  // Update hero KPIs
+  const acc = getAccumulatedTotals();
+  const commEl = document.getElementById('kpi-comm');
+  if (commEl) commEl.textContent = 'R$' + Math.round((acc.gelado*0.15 + acc.seco*0.03)/1000) + 'k';
+}
+
+// Init on load
+renderDailyAccum();
+
+
+</script>
+</body>
+</html>
